@@ -87,7 +87,8 @@
     display: flex;
     white-space: nowrap;
     will-change: transform;
-    animation: marquee 8s linear infinite;
+    /* Velocidade da barra de cima. Maior = mais devagar. */
+    animation: marquee 30s linear infinite;
   }
   .marquee span {
     font-family: 'Syne', sans-serif;
@@ -229,20 +230,7 @@
   }
   .panel__body {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 30px;
-    gap: 14px;
-  }
-  .panel__emoji { font-size: 46px; opacity: 0.5; }
-  .panel__hint {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 21px;
-    color: rgba(196,181,232,.55);
-    line-height: 1.5;
+    /* área vazia — reservada pro chat transparente que você vai sobrepor */
   }
 </style>
 </head>
@@ -283,10 +271,8 @@
           <span class="dot"></span>
           <span class="panel__title">Chat ao vivo</span>
         </div>
-        <div class="panel__body">
-          <span class="panel__emoji">💬</span>
-          <span class="panel__hint">Posicione o seu chat<br>nesta área</span>
-        </div>
+        <!-- área livre: coloque aqui o seu chat transparente (outro Browser Source por cima) -->
+        <div class="panel__body"></div>
       </div>
     </div>
   </div>
