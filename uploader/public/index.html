@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Overlays — Gerador de Overlay Lives</title>
+<style>
+  :root {
+    --bg: #0d0f14;
+    --panel: #161a22;
+    --panel-2: #1d222c;
+    --border: #2a3140;
+    --text: #e7ebf2;
+    --muted: #8c97a8;
+    --accent: #6c8cff;
+    --accent-2: #4b6bff;
+    --ok: #34d399;
+    --warn: #fbbf24;
+    --danger: #f87171;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(1200px 600px at 70% -10%, #1a2440 0%, var(--bg) 55%);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 32px 20px 80px; }
+  header { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  header h1 { font-size: 22px; margin: 0; }
+  .badge-live {
+    font-size: 11px; font-weight: 700; letter-spacing: .5px;
+    background: var(--danger); color: #fff; padding: 3px 8px; border-radius: 6px;
+    text-transform: uppercase;
+  }
+  .sub { color: var(--muted); margin: 0 0 24px; font-size: 14px; }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px; margin-bottom: 18px;
+  }
+  .card h2 { font-size: 15px; margin: 0 0 14px; }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+  .tab {
+    background: var(--panel-2); border: 1px solid var(--border); color: var(--muted);
+    padding: 8px 14px; border-radius: 9px; cursor: pointer; font-size: 13px;
+  }
+  .tab.active { color: var(--text); border-color: var(--accent); background: #20283c; }
+
+  .drop {
+    border: 2px dashed var(--border); border-radius: 12px; padding: 34px 20px;
+    text-align: center; color: var(--muted); cursor: pointer; transition: .15s;
+  }
+  .drop.over { border-color: var(--accent); background: #1a2236; color: var(--text); }
+  .drop strong { color: var(--text); }
+  .drop .file-name { margin-top: 10px; color: var(--accent); font-weight: 600; }
+
+  textarea {
+    width: 100%; min-height: 180px; resize: vertical; font-family: ui-monospace, Menlo, monospace;
+    font-size: 12.5px; background: #0f131b; color: var(--text);
+    border: 1px solid var(--border); border-radius: 10px; padding: 12px;
+  }
+
+  label.field { display: block; font-size: 12px; color: var(--muted); margin: 14px 0 6px; }
+  input[type=text] {
+    width: 100%; background: #0f131b; color: var(--text);
+    border: 1px solid var(--border); border-radius: 10px; padding: 11px 12px; font-size: 14px;
+  }
+  input::placeholder, textarea::placeholder { color: #5a6577; }
+
+  .btn {
+    border: none; border-radius: 10px; padding: 11px 18px; font-size: 14px; font-weight: 600;
+    cursor: pointer; background: var(--accent-2); color: #fff; margin-top: 16px;
+  }
+  .btn:hover { background: var(--accent); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn.ghost { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); }
+  .btn.small { padding: 6px 11px; font-size: 12px; margin: 0; }
+  .btn.danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
+
+  .msg { margin-top: 14px; font-size: 13px; padding: 10px 12px; border-radius: 9px; display: none; }
+  .msg.show { display: block; }
+  .msg.ok { background: rgba(52,211,153,.12); color: var(--ok); border: 1px solid rgba(52,211,153,.3); }
+  .msg.warn { background: rgba(251,191,36,.12); color: var(--warn); border: 1px solid rgba(251,191,36,.3); }
+  .msg.err { background: rgba(248,113,113,.12); color: var(--danger); border: 1px solid rgba(248,113,113,.3); }
+
+  .overlay-item {
+    display: flex; align-items: center; gap: 10px; padding: 12px;
+    border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; background: var(--panel-2);
+  }
+  .overlay-item .name { font-weight: 600; flex: 0 0 auto; }
+  .overlay-item .url { color: var(--muted); font-size: 12px; flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .overlay-item .actions { display: flex; gap: 6px; flex: 0 0 auto; }
+  .empty { color: var(--muted); font-size: 13px; }
+
+  .setup { font-size: 13px; line-height: 1.6; color: var(--muted); }
+  .setup code { background: #0f131b; padding: 2px 6px; border-radius: 5px; color: var(--text); }
+  details { margin-top: 8px; }
+  summary { cursor: pointer; color: var(--accent); font-size: 13px; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Overlays</h1>
+    <span class="badge-live">ao vivo</span>
+  </header>
+  <p class="sub">Suba seu HTML, ele publica no GitHub Pages e te dá a URL pra colar no Browser Source do OBS.</p>
+
+  <div id="setupWarn" class="msg warn" style="margin-bottom:18px;"></div>
+
+  <!-- Upload -->
+  <div class="card">
+    <h2>Subir overlay</h2>
+    <div class="tabs">
+      <div class="tab active" data-tab="file">Arquivo .html</div>
+      <div class="tab" data-tab="code">Colar código</div>
+    </div>
+
+    <div id="tab-file">
+      <div id="drop" class="drop">
+        <strong>Arraste o arquivo .html aqui</strong><br />ou clique pra escolher
+        <div id="fileName" class="file-name"></div>
+      </div>
+      <input id="fileInput" type="file" accept=".html,.htm,text/html" hidden />
+    </div>
+
+    <div id="tab-code" style="display:none">
+      <textarea id="codeInput" placeholder="Cole aqui o código HTML do overlay..."></textarea>
+    </div>
+
+    <label class="field" for="nameInput">Nome do overlay (vira o nome do arquivo / URL)</label>
+    <input id="nameInput" type="text" placeholder="ex: moldura-camera" />
+
+    <button id="uploadBtn" class="btn">Publicar overlay</button>
+    <div id="uploadMsg" class="msg"></div>
+  </div>
+
+  <!-- Lista -->
+  <div class="card">
+    <h2>Overlays publicados</h2>
+    <div id="list"></div>
+  </div>
+
+  <!-- Ajuda OBS -->
+  <div class="card">
+    <h2>Como usar no OBS da nuvem (IRLToolkit)</h2>
+    <div class="setup">
+      1. Clique em <strong>Copiar URL</strong> no overlay desejado.<br />
+      2. No OBS remoto (neko), aperte <code>Ctrl+Alt+Shift</code> pra abrir o painel de colar, cole a URL, e aperte <code>Ctrl+Alt+Shift</code> de novo pra fechar.<br />
+      3. Adicione um <strong>Browser Source</strong> e cole a URL. Defina largura/altura iguais à sua live (ex: 1920×1080).<br />
+      4. Ao atualizar um overlay aqui, no OBS clique com o botão direito no source → <strong>Refresh cache of current page</strong>.
+      <details>
+        <summary>Dica: pré-visualização instantânea</summary>
+        O botão <strong>Prévia</strong> abre o overlay direto do seu PC (sem esperar o GitHub) — bom pra conferir o visual antes de mandar pro OBS. A URL do GitHub pode levar ~1 min pra atualizar após publicar.
+      </details>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+let selectedFile = null;
+let pagesReady = false;
+
+// ----- tabs -----
+document.querySelectorAll('.tab').forEach((t) => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach((x) => x.classList.remove('active'));
+    t.classList.add('active');
+    const tab = t.dataset.tab;
+    $('#tab-file').style.display = tab === 'file' ? '' : 'none';
+    $('#tab-code').style.display = tab === 'code' ? '' : 'none';
+  });
+});
+
+// ----- drag & drop -----
+const drop = $('#drop');
+const fileInput = $('#fileInput');
+drop.addEventListener('click', () => fileInput.click());
+['dragover', 'dragenter'].forEach((ev) =>
+  drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); })
+);
+['dragleave', 'drop'].forEach((ev) =>
+  drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('over'); })
+);
+drop.addEventListener('drop', (e) => { if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) setFile(fileInput.files[0]); });
+
+function setFile(f) {
+  selectedFile = f;
+  $('#fileName').textContent = '📄 ' + f.name;
+  if (!$('#nameInput').value) $('#nameInput').value = f.name.replace(/\.html?$/i, '');
+}
+
+// ----- mensagens -----
+function showMsg(el, text, type) {
+  el.className = 'msg show ' + type;
+  el.innerHTML = text;
+}
+
+// ----- upload -----
+$('#uploadBtn').addEventListener('click', async () => {
+  const activeTab = document.querySelector('.tab.active').dataset.tab;
+  const name = $('#nameInput').value.trim();
+  const fd = new FormData();
+  fd.append('name', name);
+
+  if (activeTab === 'file') {
+    if (!selectedFile) return showMsg($('#uploadMsg'), 'Escolha um arquivo .html primeiro.', 'err');
+    fd.append('file', selectedFile);
+  } else {
+    const code = $('#codeInput').value.trim();
+    if (!code) return showMsg($('#uploadMsg'), 'Cole o código HTML primeiro.', 'err');
+    if (!name) return showMsg($('#uploadMsg'), 'Dê um nome ao overlay.', 'err');
+    fd.append('htmlContent', code);
+  }
+
+  $('#uploadBtn').disabled = true;
+  showMsg($('#uploadMsg'), 'Publicando...', 'warn');
+  try {
+    const r = await fetch('/api/upload', { method: 'POST', body: fd });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Falha no upload');
+
+    if (data.pushed && data.pagesUrl) {
+      showMsg($('#uploadMsg'),
+        '✅ Publicado! URL pra colar no OBS:<br><strong>' + data.pagesUrl + '</strong><br><small>Pode levar ~1 min pro GitHub atualizar.</small>',
+        'ok');
+    } else if (data.pagesUrl) {
+      showMsg($('#uploadMsg'),
+        '⚠️ Salvo localmente, mas não consegui publicar no GitHub:<br><small>' + (data.pushMessage || '') + '</small>',
+        'warn');
+    } else {
+      showMsg($('#uploadMsg'),
+        '⚠️ Salvo localmente. Configure o GitHub (veja instruções no topo) pra gerar a URL pública.',
+        'warn');
+    }
+    selectedFile = null;
+    $('#fileName').textContent = '';
+    $('#codeInput').value = '';
+    loadList();
+  } catch (e) {
+    showMsg($('#uploadMsg'), '❌ ' + e.message, 'err');
+  } finally {
+    $('#uploadBtn').disabled = false;
+  }
+});
+
+// ----- lista -----
+async function loadList() {
+  const items = await (await fetch('/api/overlays')).json();
+  const list = $('#list');
+  if (!items.length) {
+    list.innerHTML = '<div class="empty">Nenhum overlay ainda. Suba o primeiro acima 👆</div>';
+    return;
+  }
+  list.innerHTML = items.map((it) => `
+    <div class="overlay-item">
+      <span class="name">${it.name}</span>
+      <span class="url">${it.pagesUrl || '(configure o GitHub pra ter URL)'}</span>
+      <span class="actions">
+        ${it.pagesUrl ? `<button class="btn small ghost" onclick="copyUrl('${it.pagesUrl}', this)">Copiar URL</button>` : ''}
+        <button class="btn small ghost" onclick="window.open('${it.previewUrl}','_blank')">Prévia</button>
+        <button class="btn small danger" onclick="del('${it.file}')">Excluir</button>
+      </span>
+    </div>`).join('');
+}
+
+function copyUrl(url, btn) {
+  navigator.clipboard.writeText(url).then(() => {
+    const old = btn.textContent;
+    btn.textContent = 'Copiado!';
+    setTimeout(() => (btn.textContent = old), 1200);
+  });
+}
+
+async function del(file) {
+  if (!confirm('Excluir o overlay "' + file + '"?')) return;
+  await fetch('/api/overlays/' + encodeURIComponent(file), { method: 'DELETE' });
+  loadList();
+}
+
+// ----- config / aviso de setup -----
+async function checkConfig() {
+  const c = await (await fetch('/api/config')).json();
+  pagesReady = c.hasRemote;
+  const warn = $('#setupWarn');
+  if (!c.hasGit) {
+    warn.className = 'msg warn show';
+    warn.innerHTML = 'Esta pasta ainda não é um repositório Git. Veja o <strong>README.md</strong> pra configurar o GitHub (1x só) e ativar as URLs públicas.';
+  } else if (!c.hasRemote) {
+    warn.className = 'msg warn show';
+    warn.innerHTML = 'Git encontrado, mas sem repositório no GitHub (origin). Conecte ao GitHub + ative o Pages pra gerar URLs. Veja o <strong>README.md</strong>.';
+  } else {
+    warn.className = 'msg';
+  }
+}
+
+checkConfig();
+loadList();
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "gerador-overlay-lives-uploader",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interface local para publicar overlays HTML no GitHub Pages e usar no OBS (IRLToolkit / neko).",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "multer": "^2.0.0"
+  }
+}
