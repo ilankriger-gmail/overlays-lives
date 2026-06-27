@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Live - encerrada</title>
+<title>Live - já volto</title>
 
 <!--
-  Overlay "Live - encerrada" — tela cheia 1920x1080 pra usar no OBS.
+  Overlay "Live - já volto" — tela cheia 1920x1080 pra usar no OBS.
   Reescrito do design do Claude (live-scene.jsx) como HTML + CSS puro.
   SEM React/Babel/support.js — so animacao em @keyframes. Leve, nao trava o OBS.
   No OBS: Browser Source 1920x1080. Pra trocar o @ ou textos, edite abaixo.
@@ -19,8 +19,8 @@
 <style>
   :root {
     --accent: #a78bfa;
-    --bg: #09060f;
-    --bar: #5b2bb0;
+    --bg: #0b0712;
+    --bar: #7c3aed;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -89,7 +89,7 @@
   }
 
   .title {
-    margin: 0; font-weight: 800; font-size: 132px;
+    margin: 0; font-weight: 800; font-size: 152px;
     line-height: 0.92; color: #fff; letter-spacing: -0.03em;
   }
   .title .accent { color: var(--accent); }
@@ -113,7 +113,7 @@
   /* painel do chat: caixa limpa (sem cabecalho), pra sobrepor o chat transparente */
   .panel {
     flex: none; width: 540px; height: calc(100% - 96px); margin: 48px 0;
-    border-radius: 22px; background: rgba(255,255,255,.04);
+    border-radius: 22px; background: rgba(255,255,255,.05);
     border: 1px solid rgba(167,139,250,.26); overflow: hidden;
   }
 </style>
@@ -125,8 +125,8 @@
 
     <div class="topbar">
       <div class="marquee">
-        <span> OBRIGADO POR COLAR   •   @NEXTLEVELDJ   •   ATÉ A PRÓXIMA   •   OBRIGADO POR COLAR   •   @NEXTLEVELDJ   •   ATÉ A PRÓXIMA   •   OBRIGADO POR COLAR   •   @NEXTLEVELDJ   •   ATÉ A PRÓXIMA   •   OBRIGADO POR COLAR   •   @NEXTLEVELDJ   •   ATÉ A PRÓXIMA   •  </span>
-        <span> OBRIGADO POR COLAR   •   @NEXTLEVELDJ   •   ATÉ A PRÓXIMA   •   OBRIGADO POR COLAR   •   @NEXTLEVELDJ   •   ATÉ A PRÓXIMA   •   OBRIGADO POR COLAR   •   @NEXTLEVELDJ   •   ATÉ A PRÓXIMA   •   OBRIGADO POR COLAR   •   @NEXTLEVELDJ   •   ATÉ A PRÓXIMA   •  </span>
+        <span> @NEXTLEVELDJ   •   AO VIVO   •   @NEXTLEVELDJ   •   AO VIVO   •   @NEXTLEVELDJ   •   AO VIVO   •   @NEXTLEVELDJ   •   AO VIVO   •  </span>
+        <span> @NEXTLEVELDJ   •   AO VIVO   •   @NEXTLEVELDJ   •   AO VIVO   •   @NEXTLEVELDJ   •   AO VIVO   •   @NEXTLEVELDJ   •   AO VIVO   •  </span>
       </div>
     </div>
 
@@ -134,12 +134,12 @@
       <div class="left">
         <div class="eyebrow-row">
           <span class="dot dot--ring"></span>
-          <span class="eyebrow">Por hoje é isso</span>
+          <span class="eyebrow">Volto num instante</span>
         </div>
 
-        <h1 class="title"><div>Live <span class="accent">encerrada</span></div></h1>
+        <h1 class="title"><div>Já <span class="accent">volto!</span></div></h1>
 
-        <p class="subtitle">Valeu demais por assistir! Já já tem mais — te vejo na próxima.</p>
+        <p class="subtitle">Segura a onda — a transmissão já já continua.</p>
 
         <div class="handle">
           <div class="handle__avatar"><img src="avatar.png" alt=""></div>

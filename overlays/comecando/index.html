@@ -6,13 +6,10 @@
 <title>Live - começando</title>
 
 <!--
-  Overlay "Live começando" — tela cheia 1920x1080 pra mostrar antes da live começar.
-
-  Reescrito do design do Claude (live-scene.jsx, cena "start") como HTML + CSS puro.
-  SEM React, SEM Babel, SEM support.js — só animação em @keyframes. Leve, não trava o OBS.
-
-  No OBS: Browser Source com Largura 1920, Altura 1080, URL deste arquivo.
-  Pra trocar o @ ou o texto, edite direto no HTML abaixo (procure por @nextleveldj).
+  Overlay "Live - começando" — tela cheia 1920x1080 pra usar no OBS.
+  Reescrito do design do Claude (live-scene.jsx) como HTML + CSS puro.
+  SEM React/Babel/support.js — so animacao em @keyframes. Leve, nao trava o OBS.
+  No OBS: Browser Source 1920x1080. Pra trocar o @ ou textos, edite abaixo.
 -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,216 +18,103 @@
 
 <style>
   :root {
-    --accent: #a78bfa;      /* roxo claro de destaque */
-    --bg: #0b0712;          /* fundo da cena */
-    --bar: #7c3aed;         /* barra superior */
+    --accent: #a78bfa;
+    --bg: #0b0712;
+    --bar: #7c3aed;
   }
-
   * { box-sizing: border-box; }
-
   html, body {
-    margin: 0;
-    height: 100%;
-    background: var(--bg);
-    overflow: hidden;
+    margin: 0; height: 100%;
+    background: var(--bg); overflow: hidden;
     font-family: 'Bricolage Grotesque', sans-serif;
   }
-
-  /* O palco é fixo em 1920x1080 e escala pra caber na janela (ver script no fim).
-     No OBS, com o Browser Source em 1920x1080, fica 1:1. */
   #stage {
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 1920px;
-    height: 1080px;
+    position: absolute; top: 50%; left: 50%;
+    width: 1920px; height: 1080px;
     transform: translate(-50%, -50%) scale(var(--s, 1));
     transform-origin: center center;
-    background: var(--bg);
-    overflow: hidden;
+    background: var(--bg); overflow: hidden;
   }
-
-  /* ── brilhos ambientes (radiais que pulsam) ─────────────────────────── */
-  .glow {
-    position: absolute;
-    border-radius: 50%;
-    pointer-events: none;
-  }
+  .glow { position: absolute; border-radius: 50%; pointer-events: none; }
   .glow--1 {
-    left: -12%; top: -18%;
-    width: 760px; height: 760px;
+    left: -12%; top: -18%; width: 760px; height: 760px;
     background: radial-gradient(circle at 45% 45%, rgba(124,58,237,.5), transparent 62%);
-    filter: blur(20px);
-    animation: glowPulse 8s ease-in-out infinite;
+    filter: blur(20px); animation: glowPulse 8s ease-in-out infinite;
   }
   .glow--2 {
-    right: 10%; bottom: -22%;
-    width: 620px; height: 620px;
+    right: 10%; bottom: -22%; width: 620px; height: 620px;
     background: radial-gradient(circle at 50% 50%, rgba(168,85,247,.3), transparent 62%);
-    filter: blur(26px);
-    animation: glowPulse2 8s ease-in-out infinite;
-    animation-delay: -1.9s;
+    filter: blur(26px); animation: glowPulse2 8s ease-in-out infinite; animation-delay: -1.9s;
   }
   @keyframes glowPulse  { 0%{opacity:.5}  25%{opacity:.85} 50%{opacity:.5}  75%{opacity:.15} 100%{opacity:.5}  }
   @keyframes glowPulse2 { 0%{opacity:.45} 25%{opacity:.75} 50%{opacity:.45} 75%{opacity:.15} 100%{opacity:.45} }
 
-  /* ── barra superior com texto correndo (marquee) ────────────────────── */
   .topbar {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 64px;
-    background: var(--bar);
-    display: flex;
-    align-items: center;
-    overflow: hidden;
+    position: absolute; top: 0; left: 0; right: 0; height: 64px;
+    background: var(--bar); display: flex; align-items: center; overflow: hidden;
   }
   .marquee {
-    display: flex;
-    white-space: nowrap;
-    will-change: transform;
+    display: flex; white-space: nowrap; will-change: transform;
     /* Velocidade da barra de cima. Maior = mais devagar. */
     animation: marquee 30s linear infinite;
   }
   .marquee span {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 26px;
-    letter-spacing: 0.18em;
-    color: #ede4ff;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 26px;
+    letter-spacing: 0.18em; color: #ede4ff;
   }
   @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-  /* ── área principal ─────────────────────────────────────────────────── */
   .main {
-    position: absolute;
-    top: 64px; left: 0; right: 0; bottom: 0;
-    display: flex;
-    align-items: center;
-    gap: 70px;
-    padding: 0 80px;
+    position: absolute; top: 64px; left: 0; right: 0; bottom: 0;
+    display: flex; align-items: center; gap: 70px; padding: 0 80px;
   }
-
   .left { flex: 1; min-width: 0; }
 
-  .eyebrow-row {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 24px;
-  }
+  .eyebrow-row { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
   .eyebrow {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 24px;
-    font-weight: 600;
-    letter-spacing: 0.3em;
-    color: var(--accent);
-    text-transform: uppercase;
+    font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 600;
+    letter-spacing: 0.3em; color: var(--accent); text-transform: uppercase;
   }
-
-  /* ponto pulsante + anel que expande */
   .dot {
-    width: 13px; height: 13px;
-    border-radius: 50%;
-    background: var(--accent);
-    flex: none;
-    animation: dotPulse 2s ease-in-out infinite;
+    width: 13px; height: 13px; border-radius: 50%; background: var(--accent);
+    flex: none; animation: dotPulse 2s ease-in-out infinite;
   }
   .dot--ring { animation: dotPulse 2s ease-in-out infinite, ring 2s linear infinite; }
   @keyframes dotPulse {
-    0%   { transform: scale(1); }
-    25%  { transform: scale(1.13); }
-    50%  { transform: scale(1); }
-    75%  { transform: scale(0.87); }
-    100% { transform: scale(1); }
+    0%{transform:scale(1)} 25%{transform:scale(1.13)} 50%{transform:scale(1)}
+    75%{transform:scale(0.87)} 100%{transform:scale(1)}
   }
   @keyframes ring {
-    0%   { box-shadow: 0 0 0 0   rgba(124,58,237,.5); }
-    100% { box-shadow: 0 0 0 12px rgba(124,58,237,0); }
+    0%{box-shadow:0 0 0 0 rgba(124,58,237,.5)} 100%{box-shadow:0 0 0 12px rgba(124,58,237,0)}
   }
 
   .title {
-    margin: 0;
-    font-weight: 800;
-    font-size: 132px;
-    line-height: 0.92;
-    color: #fff;
-    letter-spacing: -0.03em;
+    margin: 0; font-weight: 800; font-size: 132px;
+    line-height: 0.92; color: #fff; letter-spacing: -0.03em;
   }
   .title .accent { color: var(--accent); }
-
   .subtitle {
-    margin: 28px 0 0;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 30px;
-    font-weight: 500;
-    color: #c4b5e8;
-    line-height: 1.4;
-    max-width: 620px;
+    margin: 28px 0 0; font-family: 'Space Grotesk', sans-serif; font-size: 30px;
+    font-weight: 500; color: #c4b5e8; line-height: 1.4; max-width: 620px;
   }
 
-  /* pílula do @ com avatar */
   .handle {
-    margin-top: 46px;
-    display: inline-flex;
-    align-items: center;
-    gap: 16px;
-    padding: 14px 28px 14px 14px;
-    border-radius: 100px;
-    background: rgba(255,255,255,.06);
-    border: 1px solid rgba(167,139,250,.35);
+    margin-top: 46px; display: inline-flex; align-items: center; gap: 16px;
+    padding: 14px 28px 14px 14px; border-radius: 100px;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(167,139,250,.35);
   }
   .handle__avatar {
-    width: 52px; height: 52px;
-    border-radius: 50%;
-    overflow: hidden;
-    background: #1a0f2e;
-    border: 2px solid rgba(167,139,250,.6);
-    flex: none;
+    width: 52px; height: 52px; border-radius: 50%; overflow: hidden;
+    background: #1a0f2e; border: 2px solid rgba(167,139,250,.6); flex: none;
   }
-  .handle__avatar img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    object-position: 50% 20%;
-    display: block;
-  }
-  .handle__name {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 28px;
-    font-weight: 600;
-    color: #fff;
-  }
+  .handle__avatar img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 20%; display: block; }
+  .handle__name { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 600; color: #fff; }
 
-  /* ── painel de chat ─────────────────────────────────────────────────── */
+  /* painel do chat: caixa limpa (sem cabecalho), pra sobrepor o chat transparente */
   .panel {
-    flex: none;
-    width: 540px;
-    height: calc(100% - 96px);
-    margin: 48px 0;
-    border-radius: 22px;
-    background: rgba(255,255,255,.05);
-    border: 1px solid rgba(167,139,250,.26);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .panel__head {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 24px 28px;
-    border-bottom: 1px solid rgba(167,139,250,.2);
-  }
-  .panel__head .dot { width: 11px; height: 11px; }
-  .panel__title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: 0.2em;
-    color: #d8b4fe;
-    text-transform: uppercase;
-  }
-  .panel__body {
-    flex: 1;
-    /* área vazia — reservada pro chat transparente que você vai sobrepor */
+    flex: none; width: 540px; height: calc(100% - 96px); margin: 48px 0;
+    border-radius: 22px; background: rgba(255,255,255,.05);
+    border: 1px solid rgba(167,139,250,.26); overflow: hidden;
   }
 </style>
 </head>
@@ -239,7 +123,6 @@
     <div class="glow glow--1"></div>
     <div class="glow glow--2"></div>
 
-    <!-- barra superior correndo -->
     <div class="topbar">
       <div class="marquee">
         <span> @NEXTLEVELDJ   •   A LIVE JÁ VAI COMEÇAR   •   @NEXTLEVELDJ   •   A LIVE JÁ VAI COMEÇAR   •   @NEXTLEVELDJ   •   A LIVE JÁ VAI COMEÇAR   •   @NEXTLEVELDJ   •   A LIVE JÁ VAI COMEÇAR   •  </span>
@@ -248,17 +131,13 @@
     </div>
 
     <div class="main">
-      <!-- coluna esquerda -->
       <div class="left">
         <div class="eyebrow-row">
           <span class="dot dot--ring"></span>
           <span class="eyebrow">Prepara que vem aí</span>
         </div>
 
-        <h1 class="title">
-          <div>A live</div>
-          <div>começa <span class="accent">já já!</span></div>
-        </h1>
+        <h1 class="title"><div>A live</div><div>começa <span class="accent">já já!</span></div></h1>
 
         <p class="subtitle">Ajeita o som e fica de boa — em instantes a gente começa.</p>
 
@@ -268,27 +147,15 @@
         </div>
       </div>
 
-      <!-- painel de chat -->
-      <div class="panel">
-        <div class="panel__head">
-          <span class="dot"></span>
-          <span class="panel__title">Chat ao vivo</span>
-        </div>
-        <!-- área livre: coloque aqui o seu chat transparente (outro Browser Source por cima) -->
-        <div class="panel__body"></div>
-      </div>
+      <!-- area livre pro seu chat transparente (outro Browser Source por cima) -->
+      <div class="panel"></div>
     </div>
   </div>
 
   <script>
-    // Escala o palco 1920x1080 pra caber na janela (preview no PC).
-    // No OBS, com o Browser Source em 1920x1080, o fator é 1 (sem escala).
     var stage = document.getElementById('stage');
-    function fit() {
-      stage.style.setProperty('--s', Math.min(innerWidth / 1920, innerHeight / 1080));
-    }
-    addEventListener('resize', fit);
-    fit();
+    function fit(){ stage.style.setProperty('--s', Math.min(innerWidth/1920, innerHeight/1080)); }
+    addEventListener('resize', fit); fit();
   </script>
 </body>
 </html>
