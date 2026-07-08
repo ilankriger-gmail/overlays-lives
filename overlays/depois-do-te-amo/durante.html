@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Depois do Te Amo — overlay durante a live</title>
+
+<!--
+  Overlay TRANSPARENTE pra ficar POR CIMA da câmera durante a live inteira.
+  Diferente das outras telas (que têm fundo preto), aqui o fundo é transparente:
+  no OBS, coloque este Browser Source ACIMA da câmera e ele só desenha o cartão.
+
+  Objetivo: dar contexto pra quem cai de paraquedas — o que é "Depois do Te Amo"
+  e que o episódio 1 é com a Fran (esposa). O cartão SOBE, fica ~10s e SOME,
+  alternando entre 2 mensagens, em loop infinito (só CSS @keyframes, leve pro OBS).
+
+  DUPLA TRANSMISSÃO (horizontal + vertical): o cartão vive na "zona segura"
+  central (--safe), então sobrevive ao corte 9:16 do meio da tela. Fica na parte
+  de baixo pra não tapar o rosto de vocês.
+
+  No OBS: Browser Source 1920x1080, fundo transparente (não marque "cor de fundo").
+  Pra trocar textos/nomes, edite os blocos .card lá embaixo.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Noto+Color+Emoji&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --tinta: #17130f;
+    --amarelo: #ffd23a;
+    --laranja: #ff8a2e;
+    --vermelho: #e8420e;
+    --apagado: #5a4a3a;
+    --cinza: #cabfb0;
+    /* Largura da zona segura central (recorte vertical 9:16 de 1080 = ~608px).
+       Diminua se o corte da sua live vertical for mais fechado. */
+    --safe: 600px;
+    /* Duração do ciclo completo (cartão 1 -> vazio -> cartão 2 -> vazio -> repete).
+       Cada mensagem fica ~40% do tempo (~12s) no ar, com ~10% de intervalo vazio
+       entre elas — tempo de sobra pra galera ler. */
+    --loop: 30s;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%;
+    background: transparent;          /* TRANSPARENTE: mostra a câmera atrás */
+    overflow: hidden;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  #stage {
+    position: absolute; top: 50%; left: 50%;
+    width: 1920px; height: 1080px;
+    transform: translate(-50%, -50%) scale(var(--s, 1));
+    transform-origin: center center;
+    background: transparent; overflow: hidden;
+  }
+
+  /* área central-baixa onde os cartões aparecem (dentro da zona segura) */
+  .card-wrap {
+    position: absolute; left: 50%; bottom: 120px;
+    transform: translateX(-50%);      /* centraliza a coluna na tela */
+    width: 100%; max-width: var(--safe); height: 420px;
+    pointer-events: none;
+  }
+
+  /* cartão base — os dois se sobrepõem no mesmo lugar e fazem cross-fade */
+  .card {
+    position: absolute; left: 50%; bottom: 0;
+    width: 100%;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    gap: 20px;
+    padding: 30px 38px 34px;
+    border-radius: 24px;
+    /* translúcido: a câmera aparece atrás. O blur (vidro fosco) mantém o texto legível. */
+    background:
+      linear-gradient(160deg, rgba(22,17,13,.55), rgba(10,9,11,.48));
+    -webkit-backdrop-filter: blur(10px) saturate(1.05);
+    backdrop-filter: blur(10px) saturate(1.05);
+    border: 1.5px solid rgba(255,138,46,.26);
+    box-shadow:
+      0 16px 44px rgba(0,0,0,.38),
+      0 0 38px rgba(232,66,14,.16),
+      inset 0 0 0 1px rgba(255,210,58,.06);
+    opacity: 0;                       /* começam escondidos; keyframes controlam */
+    transform: translate(-50%, 34px);
+    overflow: hidden;
+  }
+  /* fiozinho de fogo no topo do cartão */
+  .card::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    background: linear-gradient(90deg, var(--amarelo), var(--laranja) 55%, var(--vermelho));
+  }
+
+  .card--1 { animation: dtaCard1 var(--loop) linear infinite; }
+  .card--2 { animation: dtaCard2 var(--loop) linear infinite; }
+
+  /* Cartão 1: visível 0–40%. Vazio 40–50%. Cartão 2: visível 50–90%. Vazio 90–100%. */
+  @keyframes dtaCard1 {
+    0%   { opacity: 0; transform: translate(-50%, 34px); }
+    4%   { opacity: 1; transform: translate(-50%, 0); }
+    36%  { opacity: 1; transform: translate(-50%, 0); }
+    40%  { opacity: 0; transform: translate(-50%, -22px); }
+    100% { opacity: 0; transform: translate(-50%, -22px); }
+  }
+  @keyframes dtaCard2 {
+    0%   { opacity: 0; transform: translate(-50%, 34px); }
+    50%  { opacity: 0; transform: translate(-50%, 34px); }
+    54%  { opacity: 1; transform: translate(-50%, 0); }
+    86%  { opacity: 1; transform: translate(-50%, 0); }
+    90%  { opacity: 0; transform: translate(-50%, -22px); }
+    100% { opacity: 0; transform: translate(-50%, -22px); }
+  }
+
+  /* Cartão 2 tem visual próprio (quente/avermelhado) pra NÃO parecer igual ao 1. */
+  .card--2 {
+    background: linear-gradient(160deg, rgba(58,20,10,.56), rgba(24,9,9,.50));
+    border-color: rgba(255,210,58,.45);
+    box-shadow:
+      0 16px 44px rgba(0,0,0,.40),
+      0 0 48px rgba(232,66,14,.26),
+      inset 0 0 0 1px rgba(255,210,58,.10);
+  }
+  .card--2::before {
+    background: linear-gradient(90deg, var(--vermelho), var(--laranja) 45%, var(--amarelo));
+  }
+  .card--2 .eyebrow { background: var(--vermelho); color: #fff; transform: rotate(2deg); }
+  .card--2 .eyebrow .dot { background: var(--amarelo); }
+
+  /* etiqueta de cima (eyebrow) */
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: var(--amarelo); color: var(--tinta);
+    font-weight: 700; font-size: 20px; letter-spacing: .07em;
+    text-transform: uppercase;
+    padding: 9px 22px; border-radius: 11px; transform: rotate(-2deg);
+  }
+  .eyebrow .dot {
+    width: 13px; height: 13px; border-radius: 50%; background: var(--vermelho);
+    animation: dotPulse 2s ease-in-out infinite, ring 2s linear infinite;
+  }
+  @keyframes dotPulse { 0%,50%,100%{transform:scale(1)} 25%{transform:scale(1.15)} 75%{transform:scale(.85)} }
+  @keyframes ring { 0%{box-shadow:0 0 0 0 rgba(232,66,14,.55)} 100%{box-shadow:0 0 0 12px rgba(232,66,14,0)} }
+
+  /* logo — reticências antes do coração em chamas (versão compacta) */
+  .logo {
+    transform: rotate(-2.5deg);
+    font-family: 'Luckiest Guy', sans-serif; text-transform: uppercase; line-height: .9;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .logo__top {
+    font-size: 26px; color: var(--amarelo);
+    text-shadow: 3px 3px 0 rgba(232,66,14,.55);
+  }
+  .logo__teamo {
+    font-size: 62px; color: #fff; white-space: nowrap;
+    text-shadow: 4px 5px 0 var(--vermelho);
+  }
+  .dots { display: inline-flex; align-items: center; gap: 14px; margin-top: 4px; }
+  .d { border-radius: 50%; display: inline-block; }
+  .d1 { width: 16px; height: 16px; animation: acende1 3.2s ease-in-out infinite; }
+  .d2 { width: 20px; height: 20px; animation: acende2 3.2s ease-in-out infinite; }
+  .heart {
+    font-family: 'Noto Color Emoji', emoji; font-size: 52px;
+    display: inline-block; animation: flare 3.2s ease-in-out infinite;
+  }
+  @keyframes acende1 {
+    0%, 8%   { background: var(--apagado); box-shadow: none; }
+    18%, 82% { background: var(--laranja); box-shadow: 0 0 16px rgba(255,138,46,.85); }
+    94%,100% { background: var(--apagado); box-shadow: none; }
+  }
+  @keyframes acende2 {
+    0%, 24%  { background: var(--apagado); box-shadow: none; }
+    34%, 82% { background: var(--amarelo); box-shadow: 0 0 20px rgba(255,210,58,.85); }
+    94%,100% { background: var(--apagado); box-shadow: none; }
+  }
+  @keyframes flare {
+    0%, 38%  { transform: scale(1) rotate(0deg); filter: none; }
+    50%      { transform: scale(1.14) rotate(-3deg); filter: drop-shadow(0 0 20px rgba(255,138,46,.9)); }
+    62%      { transform: scale(1.06) rotate(2deg); filter: drop-shadow(0 0 14px rgba(255,138,46,.7)); }
+    76%, 100%{ transform: scale(1) rotate(0deg); filter: none; }
+  }
+
+  .say { font-size: 24px; font-weight: 500; color: var(--cinza); margin: 0; line-height: 1.4; }
+  .say b { color: #fff; font-weight: 700; }
+
+  /* Cartão 2 — nome do episódio */
+  .ep-nome {
+    font-family: 'Luckiest Guy', sans-serif; text-transform: uppercase;
+    color: #fff; font-size: 58px; line-height: .95; margin: 2px 0;
+    text-shadow: 4px 5px 0 var(--vermelho); transform: rotate(-1.5deg);
+  }
+  .ep-nome .fran { color: var(--amarelo); text-shadow: 4px 5px 0 rgba(232,66,14,.6); }
+  .heart-inline { font-family: 'Noto Color Emoji', emoji; font-size: 28px; }
+</style>
+</head>
+<body>
+  <div id="stage">
+    <div class="card-wrap">
+
+      <!-- ======= CARTÃO 1: o que é o programa ======= -->
+      <div class="card card--1">
+        <div class="eyebrow"><span class="dot"></span> Você está assistindo</div>
+
+        <div class="logo">
+          <div class="logo__top">Depois do</div>
+          <div class="logo__teamo">te amo</div>
+          <div class="dots">
+            <span class="d d1"></span>
+            <span class="d d2"></span>
+            <span class="heart">❤️‍🔥</span>
+          </div>
+        </div>
+
+        <p class="say">Conversas de verdade sobre o que vem<br><b>depois</b> do “te amo”.</p>
+      </div>
+
+      <!-- ======= CARTÃO 2: episódio 1 com a Fran ======= -->
+      <div class="card card--2">
+        <div class="eyebrow"><span class="dot"></span> Episódio 01 · Depois do Te Amo</div>
+
+        <p class="say">Hoje o papo é <b>com a minha esposa</b></p>
+        <div class="ep-nome"><span class="fran">Fran</span> <span class="heart-inline">❤️‍🔥</span></div>
+        <p class="say">a pessoa que eu escolho todo dia.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    var stage = document.getElementById('stage');
+    function fit(){ stage.style.setProperty('--s', Math.min(innerWidth/1920, innerHeight/1080)); }
+    addEventListener('resize', fit); fit();
+  </script>
+</body>
+</html>
