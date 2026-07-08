@@ -16,7 +16,12 @@ Claude gera o HTML  →  você sobe na interface  →  GitHub Pages publica  →
 ```
 .
 ├── overlays/                 ← os overlays publicados (o GitHub Pages serve daqui)
-│   └── exemplo.html          ← overlay de exemplo (moldura + AO VIVO + lower-third)
+│   ├── exemplo.html          ← overlay de exemplo (moldura + AO VIVO + lower-third)
+│   ├── overlay.css           ← estilo compartilhado das cenas de live
+│   ├── assets/               ← avatar + fontes embutidas (funcionam offline)
+│   ├── build.js              ← gera as versões arquivo-único: node overlays/build.js
+│   ├── comecando/  javolto/  encerrada/  conexao-perdida/   ← cenas (edite o index.html)
+│   └── comecando.html  javolto.html  encerrada.html  conexao-perdida.html   ← geradas pelo build.js (não edite)
 ├── uploader/                 ← a interface de upload (app local)
 │   ├── server.js
 │   ├── public/index.html
@@ -24,6 +29,9 @@ Claude gera o HTML  →  você sobe na interface  →  GitHub Pages publica  →
 ├── iniciar-uploader.command  ← dois cliques pra abrir a interface (macOS)
 └── README.md
 ```
+
+> **Editou uma cena?** Mexa em `overlays/<cena>/index.html` (textos) ou `overlays/overlay.css` (visual)
+> e rode `node overlays/build.js` pra regerar as versões arquivo-único antes de publicar.
 
 ---
 
