@@ -9,6 +9,9 @@
   Overlay "já vai começar" — Depois do Te Amo · tela cheia 1920x1080 pro OBS.
   Identidade do Manual de Marca v1 (conceito Reticências: os pontos se acendem
   até virar o coração em chamas). HTML + CSS puro, sem framework — leve pro OBS.
+
+  DUPLA TRANSMISSÃO (horizontal + vertical): tudo que importa fica dentro da
+  "zona segura" central (--safe), pra sobreviver ao corte 9:16 do meio da tela.
   No OBS: Browser Source 1920x1080. Pra trocar textos, edite abaixo.
 -->
 
@@ -25,6 +28,9 @@
     --vermelho: #e8420e;
     --apagado: #5a4a3a;
     --cinza: #cabfb0;
+    /* Largura da zona segura central (recorte vertical 9:16 de 1080 = ~608px).
+       Diminua se o corte da sua live vertical for mais fechado. */
+    --safe: 600px;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -88,13 +94,19 @@
   /* bloco central */
   .main {
     position: absolute; top: 72px; left: 0; right: 0; bottom: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 48px; z-index: 1;
+    display: flex; align-items: center; justify-content: center; z-index: 1;
     animation: enter .8s ease-out both;
   }
   @keyframes enter {
     from { opacity: 0; transform: translateY(24px) scale(.97); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* zona segura: coluna central que sobrevive ao corte vertical */
+  .safe {
+    width: 100%; max-width: var(--safe); margin: 0 auto; padding: 0 16px;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    gap: 36px;
   }
 
   .pill {
@@ -110,28 +122,27 @@
   @keyframes dotPulse { 0%,50%,100%{transform:scale(1)} 25%{transform:scale(1.15)} 75%{transform:scale(.85)} }
   @keyframes ring { 0%{box-shadow:0 0 0 0 rgba(232,66,14,.55)} 100%{box-shadow:0 0 0 14px rgba(232,66,14,0)} }
 
-  /* logo — sempre torta, reticências antes do coração */
+  /* logo — sempre torta, reticências antes do coração (empilhada pra caber no centro) */
   .logo {
-    transform: rotate(-3deg); text-align: center;
-    font-family: 'Luckiest Guy', sans-serif; text-transform: uppercase; line-height: .94;
+    transform: rotate(-3deg);
+    font-family: 'Luckiest Guy', sans-serif; text-transform: uppercase; line-height: .92;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
   }
   .logo__top {
-    font-size: 96px; color: var(--amarelo);
-    text-shadow: 6px 6px 0 rgba(232,66,14,.55);
+    font-size: 52px; color: var(--amarelo);
+    text-shadow: 4px 4px 0 rgba(232,66,14,.55);
   }
-  .logo__row { display: flex; align-items: baseline; justify-content: center; margin-top: 8px; }
   .logo__teamo {
-    font-size: 200px; color: #fff; white-space: nowrap;
-    text-shadow: 10px 12px 0 var(--vermelho);
+    font-size: 132px; color: #fff; white-space: nowrap;
+    text-shadow: 7px 8px 0 var(--vermelho);
   }
-  .dots { display: inline-flex; align-items: baseline; gap: 22px; margin-left: 38px; }
+  .dots { display: inline-flex; align-items: center; gap: 22px; margin-top: 6px; }
   .d { border-radius: 50%; display: inline-block; }
-  .d1 { width: 32px; height: 32px; animation: acende1 3.2s ease-in-out infinite; }
-  .d2 { width: 38px; height: 38px; animation: acende2 3.2s ease-in-out infinite; }
+  .d1 { width: 26px; height: 26px; animation: acende1 3.2s ease-in-out infinite; }
+  .d2 { width: 32px; height: 32px; animation: acende2 3.2s ease-in-out infinite; }
   .heart {
-    font-family: 'Noto Color Emoji', emoji; font-size: 118px;
-    display: inline-block; transform: translateY(14px);
-    animation: flare 3.2s ease-in-out infinite;
+    font-family: 'Noto Color Emoji', emoji; font-size: 86px;
+    display: inline-block; animation: flare 3.2s ease-in-out infinite;
   }
   /* os pontos se acendem em sequência até o coração pegar fogo */
   @keyframes acende1 {
@@ -145,15 +156,15 @@
     94%,100% { background: var(--apagado); box-shadow: none; }
   }
   @keyframes flare {
-    0%, 38%  { transform: translateY(14px) scale(1) rotate(0deg); filter: none; }
-    50%      { transform: translateY(10px) scale(1.14) rotate(-3deg); filter: drop-shadow(0 0 26px rgba(255,138,46,.9)); }
-    62%      { transform: translateY(12px) scale(1.06) rotate(2deg); filter: drop-shadow(0 0 18px rgba(255,138,46,.7)); }
-    76%, 100%{ transform: translateY(14px) scale(1) rotate(0deg); filter: none; }
+    0%, 38%  { transform: scale(1) rotate(0deg); filter: none; }
+    50%      { transform: scale(1.14) rotate(-3deg); filter: drop-shadow(0 0 26px rgba(255,138,46,.9)); }
+    62%      { transform: scale(1.06) rotate(2deg); filter: drop-shadow(0 0 18px rgba(255,138,46,.7)); }
+    76%, 100%{ transform: scale(1) rotate(0deg); filter: none; }
   }
 
   .subtitle {
-    font-size: 34px; font-weight: 500; color: var(--cinza);
-    margin: 0; text-align: center;
+    font-size: 28px; font-weight: 500; color: var(--cinza);
+    margin: 0; line-height: 1.45;
   }
 </style>
 </head>
@@ -181,21 +192,21 @@
     </div>
 
     <div class="main">
-      <div class="pill"><span class="dot"></span> PREPARA O CORAÇÃO</div>
+      <div class="safe">
+        <div class="pill"><span class="dot"></span> PREPARA O CORAÇÃO</div>
 
-      <div class="logo">
-        <div class="logo__top">Depois do</div>
-        <div class="logo__row">
-          <span class="logo__teamo">te amo</span>
-          <span class="dots">
+        <div class="logo">
+          <div class="logo__top">Depois do</div>
+          <div class="logo__teamo">te amo</div>
+          <div class="dots">
             <span class="d d1"></span>
             <span class="d d2"></span>
             <span class="heart">❤️‍🔥</span>
-          </span>
+          </div>
         </div>
-      </div>
 
-      <p class="subtitle">Ajeita o fone e fica de boa — a gente começa já já.</p>
+        <p class="subtitle">Ajeita o fone e fica de boa — a gente começa já já.</p>
+      </div>
     </div>
   </div>
 

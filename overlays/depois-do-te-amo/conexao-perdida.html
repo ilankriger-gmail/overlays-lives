@@ -9,6 +9,9 @@
   Overlay "conexão perdida" — Depois do Te Amo · tela cheia 1920x1080 pro OBS.
   O coração fica fraquinho (tentando não apagar) enquanto as reticências
   fazem o "reconectando…". HTML + CSS puro. No OBS: Browser Source 1920x1080.
+
+  DUPLA TRANSMISSÃO (horizontal + vertical): tudo que importa fica dentro da
+  "zona segura" central (--safe), pra sobreviver ao corte 9:16 do meio da tela.
 -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,6 +27,8 @@
     --vermelho: #e8420e;
     --apagado: #5a4a3a;
     --cinza: #cabfb0;
+    /* Zona segura central (recorte vertical 9:16 de 1080 = ~608px). */
+    --safe: 600px;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -66,13 +71,19 @@
 
   .main {
     position: absolute; inset: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 44px; z-index: 1;
+    display: flex; align-items: center; justify-content: center; z-index: 1;
     animation: enter .8s ease-out both;
   }
   @keyframes enter {
     from { opacity: 0; transform: translateY(24px) scale(.97); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* zona segura: coluna central que sobrevive ao corte vertical */
+  .safe {
+    width: 100%; max-width: var(--safe); margin: 0 auto; padding: 0 16px;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    gap: 40px;
   }
 
   .pill {
@@ -82,10 +93,10 @@
   }
 
   .title {
-    margin: 0; transform: rotate(-3deg); text-align: center;
+    margin: 0; transform: rotate(-3deg); max-width: 100%;
     font-family: 'Luckiest Guy', sans-serif; font-weight: 400;
-    font-size: 160px; line-height: .94; color: #fff; text-transform: uppercase;
-    text-shadow: 8px 10px 0 var(--vermelho);
+    font-size: 116px; line-height: .92; color: #fff; text-transform: uppercase;
+    text-shadow: 7px 9px 0 var(--vermelho);
     /* o título dá uma piscada de sinal ruim de vez em quando */
     animation: sinalRuim 6s steps(1) infinite;
   }
@@ -97,9 +108,9 @@
   }
 
   /* reconectando… */
-  .status { display: flex; align-items: center; gap: 22px; transform: rotate(-2deg); }
+  .status { display: flex; align-items: center; gap: 20px; transform: rotate(-2deg); }
   .status__text {
-    font-size: 34px; font-weight: 600; letter-spacing: .22em;
+    font-size: 28px; font-weight: 600; letter-spacing: .14em;
     color: var(--amarelo); text-transform: uppercase;
   }
   .dots { display: inline-flex; align-items: center; gap: 16px; }
@@ -128,13 +139,13 @@
   }
 
   .subtitle {
-    font-size: 34px; font-weight: 500; color: var(--cinza);
-    margin: 0; text-align: center;
+    font-size: 28px; font-weight: 500; color: var(--cinza);
+    margin: 0; line-height: 1.45;
   }
 
   .wm {
-    position: absolute; right: 48px; bottom: 38px; z-index: 2;
-    display: flex; align-items: baseline; transform: rotate(-2deg);
+    position: absolute; left: 50%; bottom: 40px; z-index: 2;
+    display: flex; align-items: baseline; transform: translateX(-50%) rotate(-2deg);
   }
   .wm__text {
     font-family: 'Luckiest Guy', sans-serif; font-size: 30px; color: #fff;
@@ -159,20 +170,22 @@
     <span class="ember" style="left:88%; width:5px; height:5px; background:#ffd23a; animation-duration:16s; animation-delay:-8s;"></span>
 
     <div class="main">
-      <div class="pill">CALMA, JÁ VOLTA</div>
+      <div class="safe">
+        <div class="pill">CALMA, JÁ VOLTA</div>
 
-      <h1 class="title">Caiu a conexão</h1>
+        <h1 class="title">Caiu a<br>conexão</h1>
 
-      <div class="status">
-        <span class="status__text">Reconectando</span>
-        <span class="dots">
-          <span class="d d1"></span>
-          <span class="d d2"></span>
-          <span class="heart">❤️‍🔥</span>
-        </span>
+        <div class="status">
+          <span class="status__text">Reconectando</span>
+          <span class="dots">
+            <span class="d d1"></span>
+            <span class="d d2"></span>
+            <span class="heart">❤️‍🔥</span>
+          </span>
+        </div>
+
+        <p class="subtitle">Respira e segura a emoção — a gente já volta.</p>
       </div>
-
-      <p class="subtitle">Respira e segura a emoção — a gente já volta.</p>
     </div>
 
     <div class="wm">

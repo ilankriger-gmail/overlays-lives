@@ -9,6 +9,9 @@
   Overlay "já volto" — Depois do Te Amo · tela cheia 1920x1080 pro OBS.
   As reticências viram indicador de "digitando…": a pausa faz parte da história.
   HTML + CSS puro, sem framework. No OBS: Browser Source 1920x1080.
+
+  DUPLA TRANSMISSÃO (horizontal + vertical): tudo que importa fica dentro da
+  "zona segura" central (--safe), pra sobreviver ao corte 9:16 do meio da tela.
 -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,6 +27,8 @@
     --vermelho: #e8420e;
     --apagado: #5a4a3a;
     --cinza: #cabfb0;
+    /* Zona segura central (recorte vertical 9:16 de 1080 = ~608px). */
+    --safe: 600px;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -65,13 +70,19 @@
 
   .main {
     position: absolute; inset: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 46px; z-index: 1;
+    display: flex; align-items: center; justify-content: center; z-index: 1;
     animation: enter .8s ease-out both;
   }
   @keyframes enter {
     from { opacity: 0; transform: translateY(24px) scale(.97); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* zona segura: coluna central que sobrevive ao corte vertical */
+  .safe {
+    width: 100%; max-width: var(--safe); margin: 0 auto; padding: 0 16px;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    gap: 40px;
   }
 
   .pill {
@@ -81,10 +92,10 @@
   }
 
   .title {
-    margin: 0; transform: rotate(-3deg);
+    margin: 0; transform: rotate(-3deg); max-width: 100%;
     font-family: 'Luckiest Guy', sans-serif; font-weight: 400;
-    font-size: 220px; line-height: .94; color: #fff; text-transform: uppercase;
-    text-shadow: 11px 13px 0 var(--vermelho);
+    font-size: 150px; line-height: .92; color: #fff; text-transform: uppercase;
+    text-shadow: 8px 10px 0 var(--vermelho);
   }
 
   /* reticências gigantes = "digitando…" */
@@ -114,14 +125,14 @@
   }
 
   .subtitle {
-    font-size: 34px; font-weight: 500; color: var(--cinza);
-    margin: 0; text-align: center;
+    font-size: 28px; font-weight: 500; color: var(--cinza);
+    margin: 0; line-height: 1.45;
   }
 
-  /* marca d'água horizontal — canto inferior direito, sempre */
+  /* marca d'água horizontal — centralizada no rodapé (aparece na live vertical) */
   .wm {
-    position: absolute; right: 48px; bottom: 38px; z-index: 2;
-    display: flex; align-items: baseline; transform: rotate(-2deg);
+    position: absolute; left: 50%; bottom: 40px; z-index: 2;
+    display: flex; align-items: baseline; transform: translateX(-50%) rotate(-2deg);
   }
   .wm__text {
     font-family: 'Luckiest Guy', sans-serif; font-size: 30px; color: #fff;
@@ -150,17 +161,19 @@
     <span class="ember" style="left:93%; width:7px;  height:7px;  background:#ffd23a; animation-duration:10s;   animation-delay:-5s;"></span>
 
     <div class="main">
-      <div class="pill">PAUSA RÁPIDA</div>
+      <div class="safe">
+        <div class="pill">PAUSA RÁPIDA</div>
 
-      <h1 class="title">Já volto</h1>
+        <h1 class="title">Já volto</h1>
 
-      <div class="dots">
-        <span class="d d1"></span>
-        <span class="d d2"></span>
-        <span class="heart">❤️‍🔥</span>
+        <div class="dots">
+          <span class="d d1"></span>
+          <span class="d d2"></span>
+          <span class="heart">❤️‍🔥</span>
+        </div>
+
+        <p class="subtitle">Não sai daí — a conversa ainda não acabou.</p>
       </div>
-
-      <p class="subtitle">Não sai daí — a conversa ainda não acabou.</p>
     </div>
 
     <div class="wm">
