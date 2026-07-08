@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Depois do Te Amo — telas da live</title>
+
+<!--
+  Índice das telas do Depois do Te Amo. Não é overlay — é só pra ver e copiar
+  as URLs. Cada card mostra a tela real (iframe em miniatura) e o link abre
+  a versão cheia pra colar no Browser Source do OBS.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Noto+Color+Emoji&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --preto: #0e0e10;
+    --tinta: #17130f;
+    --amarelo: #ffd23a;
+    --laranja: #ff8a2e;
+    --vermelho: #e8420e;
+    --cinza: #cabfb0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--preto);
+    font-family: 'Space Grotesk', sans-serif; color: #fff;
+    padding: 56px 48px 72px;
+  }
+  header { margin-bottom: 40px; }
+  .kicker {
+    font-weight: 600; font-size: 13px; letter-spacing: .24em;
+    text-transform: uppercase; color: var(--laranja);
+  }
+  h1 {
+    margin: 10px 0 0; font-family: 'Luckiest Guy', sans-serif; font-weight: 400;
+    font-size: 52px; line-height: 1; text-transform: uppercase;
+    transform: rotate(-2deg); display: inline-block;
+    text-shadow: 3px 4px 0 var(--vermelho);
+  }
+  .sub { margin: 14px 0 0; font-size: 15px; color: var(--cinza); max-width: 560px; line-height: 1.6; }
+
+  .grid { display: flex; flex-wrap: wrap; gap: 28px; }
+  .card {
+    width: 416px; border-radius: 16px; overflow: hidden;
+    background: #17130f; border: 1px solid rgba(255,255,255,.08);
+    text-decoration: none; color: inherit; display: block;
+    transition: transform .15s ease, border-color .15s ease;
+  }
+  .card:hover { transform: rotate(-1deg) scale(1.02); border-color: var(--amarelo); }
+  .thumb {
+    width: 414px; height: 233px; overflow: hidden; position: relative;
+    background: var(--preto); pointer-events: none;
+  }
+  .thumb iframe {
+    width: 1920px; height: 1080px; border: 0;
+    transform: scale(0.2156); transform-origin: top left;
+  }
+  .card__body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 4px; }
+  .card__title { font-weight: 700; font-size: 17px; }
+  .card__desc { font-size: 13px; color: var(--cinza); line-height: 1.5; }
+</style>
+</head>
+<body>
+  <header>
+    <div class="kicker">Telas da live · geral (sem capítulo)</div>
+    <h1>Depois do te amo ❤️‍🔥</h1>
+    <p class="sub">Clica num card pra abrir a tela cheia (1920×1080) e cola a URL num Browser Source do OBS. Atualizou? Botão direito no source → Refresh cache.</p>
+  </header>
+
+  <div class="grid">
+    <a class="card" href="comecando.html">
+      <div class="thumb"><iframe src="comecando.html" scrolling="no" loading="lazy" tabindex="-1"></iframe></div>
+      <div class="card__body">
+        <span class="card__title">Já vai começar</span>
+        <span class="card__desc">Tela de espera com a logo animada e letreiro no topo.</span>
+      </div>
+    </a>
+
+    <a class="card" href="ja-volto.html">
+      <div class="thumb"><iframe src="ja-volto.html" scrolling="no" loading="lazy" tabindex="-1"></iframe></div>
+      <div class="card__body">
+        <span class="card__title">Já volto</span>
+        <span class="card__desc">Pausa rápida — as reticências ficam "digitando…".</span>
+      </div>
+    </a>
+
+    <a class="card" href="encerrada.html">
+      <div class="thumb"><iframe src="encerrada.html" scrolling="no" loading="lazy" tabindex="-1"></iframe></div>
+      <div class="card__body">
+        <span class="card__title">Live encerrada</span>
+        <span class="card__desc">"Até a próxima…" — porque te amo não é o fim.</span>
+      </div>
+    </a>
+
+    <a class="card" href="conexao-perdida.html">
+      <div class="thumb"><iframe src="conexao-perdida.html" scrolling="no" loading="lazy" tabindex="-1"></iframe></div>
+      <div class="card__body">
+        <span class="card__title">Conexão perdida</span>
+        <span class="card__desc">Coração fraquinho tentando reconectar.</span>
+      </div>
+    </a>
+  </div>
+</body>
+</html>

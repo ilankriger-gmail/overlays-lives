@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Depois do Te Amo — live encerrada</title>
+
+<!--
+  Overlay "live encerrada" — Depois do Te Amo · tela cheia 1920x1080 pro OBS.
+  Conceito da marca: "te amo" não é o fim — as reticências continuam a frase.
+  Por isso o encerramento diz "até a próxima…". HTML + CSS puro.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Noto+Color+Emoji&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --preto: #0e0e10;
+    --tinta: #17130f;
+    --amarelo: #ffd23a;
+    --laranja: #ff8a2e;
+    --vermelho: #e8420e;
+    --apagado: #5a4a3a;
+    --cinza: #cabfb0;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%;
+    background: var(--preto); overflow: hidden;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  #stage {
+    position: absolute; top: 50%; left: 50%;
+    width: 1920px; height: 1080px;
+    transform: translate(-50%, -50%) scale(var(--s, 1));
+    transform-origin: center center;
+    background: var(--preto); overflow: hidden;
+  }
+
+  /* brasas mais baixas e calmas: fim de fogueira */
+  .glow { position: absolute; border-radius: 50%; pointer-events: none; }
+  .glow--1 {
+    left: 50%; bottom: -46%; width: 1400px; height: 900px; transform: translateX(-50%);
+    background: radial-gradient(ellipse at 50% 100%, rgba(232,66,14,.34), transparent 62%);
+    filter: blur(24px); animation: glowPulse 10s ease-in-out infinite;
+  }
+  .glow--2 {
+    left: -12%; top: -22%; width: 640px; height: 640px;
+    background: radial-gradient(circle at 50% 50%, rgba(255,138,46,.16), transparent 62%);
+    filter: blur(26px); animation: glowPulse 10s ease-in-out infinite; animation-delay: -5s;
+  }
+  @keyframes glowPulse { 0%,100%{opacity:.55} 30%{opacity:.85} 65%{opacity:.3} }
+
+  .ember {
+    position: absolute; bottom: -24px; border-radius: 50%;
+    animation: rise linear infinite; pointer-events: none;
+  }
+  @keyframes rise {
+    0%   { transform: translateY(0) translateX(0); opacity: 0; }
+    8%   { opacity: .8; }
+    60%  { opacity: .5; }
+    100% { transform: translateY(-1180px) translateX(60px); opacity: 0; }
+  }
+
+  .main {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 44px; z-index: 1;
+    animation: enter .9s ease-out both;
+  }
+  @keyframes enter {
+    from { opacity: 0; transform: translateY(24px) scale(.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .pill {
+    background: var(--amarelo); color: var(--tinta);
+    font-weight: 700; font-size: 26px; letter-spacing: .06em;
+    padding: 12px 30px; border-radius: 14px; transform: rotate(-2deg);
+  }
+
+  .title {
+    margin: 0; transform: rotate(-3deg); text-align: center;
+    font-family: 'Luckiest Guy', sans-serif; font-weight: 400;
+    text-transform: uppercase; line-height: .94;
+  }
+  .title__top {
+    font-size: 72px; color: var(--amarelo);
+    text-shadow: 4px 5px 0 rgba(232,66,14,.55);
+  }
+  .title__row { display: flex; align-items: baseline; justify-content: center; margin-top: 10px; }
+  .title__main {
+    font-size: 170px; color: #fff; white-space: nowrap;
+    text-shadow: 9px 11px 0 var(--vermelho);
+  }
+  .dots { display: inline-flex; align-items: baseline; gap: 20px; margin-left: 34px; }
+  .d { border-radius: 50%; display: inline-block; }
+  .d1 { width: 28px; height: 28px; animation: acende1 3.6s ease-in-out infinite; }
+  .d2 { width: 34px; height: 34px; animation: acende2 3.6s ease-in-out infinite; }
+  .heart {
+    font-family: 'Noto Color Emoji', emoji; font-size: 104px;
+    display: inline-block; transform: translateY(12px);
+    animation: flare 3.6s ease-in-out infinite;
+  }
+  @keyframes acende1 {
+    0%, 8%   { background: var(--apagado); box-shadow: none; }
+    18%, 82% { background: var(--laranja); box-shadow: 0 0 18px rgba(255,138,46,.8); }
+    94%,100% { background: var(--apagado); box-shadow: none; }
+  }
+  @keyframes acende2 {
+    0%, 24%  { background: var(--apagado); box-shadow: none; }
+    34%, 82% { background: var(--amarelo); box-shadow: 0 0 22px rgba(255,210,58,.8); }
+    94%,100% { background: var(--apagado); box-shadow: none; }
+  }
+  @keyframes flare {
+    0%, 40%  { transform: translateY(12px) scale(1) rotate(0deg); filter: none; }
+    52%      { transform: translateY(9px) scale(1.12) rotate(-3deg); filter: drop-shadow(0 0 24px rgba(255,138,46,.9)); }
+    64%      { transform: translateY(11px) scale(1.05) rotate(2deg); filter: drop-shadow(0 0 16px rgba(255,138,46,.7)); }
+    78%, 100%{ transform: translateY(12px) scale(1) rotate(0deg); filter: none; }
+  }
+
+  .subtitle {
+    font-size: 34px; font-weight: 500; color: var(--cinza);
+    margin: 0; text-align: center; line-height: 1.5;
+  }
+
+  .wm {
+    position: absolute; right: 48px; bottom: 38px; z-index: 2;
+    display: flex; align-items: baseline; transform: rotate(-2deg);
+  }
+  .wm__text {
+    font-family: 'Luckiest Guy', sans-serif; font-size: 30px; color: #fff;
+    text-transform: uppercase; white-space: nowrap; padding-top: 6px;
+    text-shadow: 2px 3px 0 var(--vermelho);
+  }
+  .wm__dots { display: inline-flex; align-items: baseline; gap: 5px; margin-left: 10px; }
+  .wm__dots .p1 { width: 7px; height: 7px; border-radius: 50%; background: var(--apagado); }
+  .wm__dots .p2 { width: 8px; height: 8px; border-radius: 50%; background: var(--laranja); }
+  .wm__heart { font-family: 'Noto Color Emoji', emoji; font-size: 25px; transform: translateY(3px); display: inline-block; }
+</style>
+</head>
+<body>
+  <div id="stage">
+    <div class="glow glow--1"></div>
+    <div class="glow glow--2"></div>
+
+    <span class="ember" style="left:12%; width:6px;  height:6px;  background:#ffd23a; animation-duration:11s;   animation-delay:0s;"></span>
+    <span class="ember" style="left:24%; width:8px;  height:8px;  background:#ff8a2e; animation-duration:13s;   animation-delay:-5s;"></span>
+    <span class="ember" style="left:37%; width:5px;  height:5px;  background:#e8420e; animation-duration:12s;   animation-delay:-8s;"></span>
+    <span class="ember" style="left:50%; width:9px;  height:9px;  background:#ff8a2e; animation-duration:10.5s; animation-delay:-3s;"></span>
+    <span class="ember" style="left:64%; width:6px;  height:6px;  background:#ffd23a; animation-duration:14s;   animation-delay:-9s;"></span>
+    <span class="ember" style="left:78%; width:7px;  height:7px;  background:#ff8a2e; animation-duration:11.5s; animation-delay:-6s;"></span>
+    <span class="ember" style="left:90%; width:5px;  height:5px;  background:#e8420e; animation-duration:12.5s; animation-delay:-2s;"></span>
+
+    <div class="main">
+      <div class="pill">POR HOJE É SÓ</div>
+
+      <div class="title">
+        <div class="title__top">A live acabou, mas…</div>
+        <div class="title__row">
+          <span class="title__main">até a próxima</span>
+          <span class="dots">
+            <span class="d d1"></span>
+            <span class="d d2"></span>
+            <span class="heart">❤️‍🔥</span>
+          </span>
+        </div>
+      </div>
+
+      <p class="subtitle">Obrigado por ficar até aqui. Isso não foi um adeus — a história continua.</p>
+    </div>
+
+    <div class="wm">
+      <span class="wm__text">Depois do te amo</span>
+      <span class="wm__dots">
+        <span class="p1"></span>
+        <span class="p2"></span>
+        <span class="wm__heart">❤️‍🔥</span>
+      </span>
+    </div>
+  </div>
+
+  <script>
+    var stage = document.getElementById('stage');
+    function fit(){ stage.style.setProperty('--s', Math.min(innerWidth/1920, innerHeight/1080)); }
+    addEventListener('resize', fit); fit();
+  </script>
+</body>
+</html>
