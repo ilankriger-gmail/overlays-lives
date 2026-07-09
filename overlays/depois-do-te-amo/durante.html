@@ -38,9 +38,9 @@
        Diminua se o corte da sua live vertical for mais fechado. */
     --safe: 600px;
     /* Duração do ciclo completo (cartão 1 -> muito vazio -> cartão 2 -> muito vazio).
-       Cada mensagem aparece ~10s (tempo de ler) e some por ~20s de TELA LIMPA, pra
-       não ficar repetindo o tempo todo. Aumente --loop pra ter ainda mais tela vazia. */
-    --loop: 60s;
+       Cada mensagem aparece ~10s (tempo de ler) e some por ~50s de TELA LIMPA, pra
+       aparecer bem de vez em quando. Aumente --loop pra espaçar ainda mais. */
+    --loop: 120s;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -96,22 +96,22 @@
   .card--1 { animation: dtaCard1 var(--loop) linear infinite; }
   .card--2 { animation: dtaCard2 var(--loop) linear infinite; }
 
-  /* Cartão 1 aparece ~10s (0–17%) e some. Depois ~20s de tela vazia (17–50%).
-     Cartão 2 aparece ~10s (50–67%) e some. De novo ~20s de tela vazia (67–100%). */
+  /* Num ciclo de 120s: cartão 1 aparece ~10s (0–8.5% = 0–10s) e some por ~50s.
+     Cartão 2 aparece ~10s (50–58.5% = 60–70s) e some por ~50s. Bem espaçado. */
   @keyframes dtaCard1 {
-    0%   { opacity: 0; transform: translate(-50%, 34px); }
-    2%   { opacity: 1; transform: translate(-50%, 0); }
-    15%  { opacity: 1; transform: translate(-50%, 0); }
-    17%  { opacity: 0; transform: translate(-50%, -22px); }
-    100% { opacity: 0; transform: translate(-50%, -22px); }
+    0%    { opacity: 0; transform: translate(-50%, 34px); }
+    1%    { opacity: 1; transform: translate(-50%, 0); }
+    7.5%  { opacity: 1; transform: translate(-50%, 0); }
+    8.5%  { opacity: 0; transform: translate(-50%, -22px); }
+    100%  { opacity: 0; transform: translate(-50%, -22px); }
   }
   @keyframes dtaCard2 {
-    0%   { opacity: 0; transform: translate(-50%, 34px); }
-    50%  { opacity: 0; transform: translate(-50%, 34px); }
-    52%  { opacity: 1; transform: translate(-50%, 0); }
-    65%  { opacity: 1; transform: translate(-50%, 0); }
-    67%  { opacity: 0; transform: translate(-50%, -22px); }
-    100% { opacity: 0; transform: translate(-50%, -22px); }
+    0%    { opacity: 0; transform: translate(-50%, 34px); }
+    50%   { opacity: 0; transform: translate(-50%, 34px); }
+    51%   { opacity: 1; transform: translate(-50%, 0); }
+    57.5% { opacity: 1; transform: translate(-50%, 0); }
+    58.5% { opacity: 0; transform: translate(-50%, -22px); }
+    100%  { opacity: 0; transform: translate(-50%, -22px); }
   }
 
   /* Cartão 2 tem visual próprio (quente/avermelhado) pra NÃO parecer igual ao 1. */
