@@ -37,10 +37,10 @@
     /* Largura da zona segura central (recorte vertical 9:16 de 1080 = ~608px).
        Diminua se o corte da sua live vertical for mais fechado. */
     --safe: 600px;
-    /* Duração do ciclo completo (cartão 1 -> vazio -> cartão 2 -> vazio -> repete).
-       Cada mensagem fica ~40% do tempo (~12s) no ar, com ~10% de intervalo vazio
-       entre elas — tempo de sobra pra galera ler. */
-    --loop: 30s;
+    /* Duração do ciclo completo (cartão 1 -> muito vazio -> cartão 2 -> muito vazio).
+       Cada mensagem aparece ~10s (tempo de ler) e some por ~20s de TELA LIMPA, pra
+       não ficar repetindo o tempo todo. Aumente --loop pra ter ainda mais tela vazia. */
+    --loop: 60s;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -96,20 +96,21 @@
   .card--1 { animation: dtaCard1 var(--loop) linear infinite; }
   .card--2 { animation: dtaCard2 var(--loop) linear infinite; }
 
-  /* Cartão 1: visível 0–40%. Vazio 40–50%. Cartão 2: visível 50–90%. Vazio 90–100%. */
+  /* Cartão 1 aparece ~10s (0–17%) e some. Depois ~20s de tela vazia (17–50%).
+     Cartão 2 aparece ~10s (50–67%) e some. De novo ~20s de tela vazia (67–100%). */
   @keyframes dtaCard1 {
     0%   { opacity: 0; transform: translate(-50%, 34px); }
-    4%   { opacity: 1; transform: translate(-50%, 0); }
-    36%  { opacity: 1; transform: translate(-50%, 0); }
-    40%  { opacity: 0; transform: translate(-50%, -22px); }
+    2%   { opacity: 1; transform: translate(-50%, 0); }
+    15%  { opacity: 1; transform: translate(-50%, 0); }
+    17%  { opacity: 0; transform: translate(-50%, -22px); }
     100% { opacity: 0; transform: translate(-50%, -22px); }
   }
   @keyframes dtaCard2 {
     0%   { opacity: 0; transform: translate(-50%, 34px); }
     50%  { opacity: 0; transform: translate(-50%, 34px); }
-    54%  { opacity: 1; transform: translate(-50%, 0); }
-    86%  { opacity: 1; transform: translate(-50%, 0); }
-    90%  { opacity: 0; transform: translate(-50%, -22px); }
+    52%  { opacity: 1; transform: translate(-50%, 0); }
+    65%  { opacity: 1; transform: translate(-50%, 0); }
+    67%  { opacity: 0; transform: translate(-50%, -22px); }
     100% { opacity: 0; transform: translate(-50%, -22px); }
   }
 
