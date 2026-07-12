@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Depois do Te Amo — durante a live (Samuel · Tatuagem falsa)</title>
+
+<!--
+  Inspirado no durante.html (edição da Fran): overlay TRANSPARENTE pra ficar POR
+  CIMA da câmera durante a live inteira. Mesma ideia de aparecer de vez em quando
+  e some por muito tempo (tela limpa), mesma zona segura central-baixa.
+
+  Diferença: aqui é UMA thumb só — um SELO/CARIMBO circular que fica GIRANDO.
+  Ele sobe girando, fica ~10s e SOME por ~110s. Episódio: Samuel · "Tatuagem falsa".
+
+  DUPLA TRANSMISSÃO (horizontal + vertical): a thumb vive na "zona segura" central
+  (--safe), então sobrevive ao corte 9:16 do meio da tela.
+
+  No OBS: Browser Source 1920x1080, fundo transparente (não marque "cor de fundo"),
+  este source ACIMA da câmera. Pra trocar textos, edite os blocos lá embaixo.
+  Pra aparecer mais/menos vezes, mude --loop. Pra girar mais rápido, diminua --spin.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Noto+Color+Emoji&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --tinta: #17130f;
+    --amarelo: #ffd23a;
+    --laranja: #ff8a2e;
+    --vermelho: #e8420e;
+    --apagado: #5a4a3a;
+    --cinza: #cabfb0;
+    /* Zona segura central (corte vertical 9:16 de 1080 ≈ 608px). */
+    --safe: 600px;
+    /* Ciclo completo: thumb aparece ~10s e some por ~110s de TELA LIMPA.
+       Aumente pra espaçar ainda mais. */
+    --loop: 120s;
+    /* Tempo de uma volta completa do selo (menor = gira mais rápido). */
+    --spin: 12s;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%;
+    background: transparent;          /* TRANSPARENTE: mostra a câmera atrás */
+    overflow: hidden;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  #stage {
+    position: absolute; top: 50%; left: 50%;
+    width: 1920px; height: 1080px;
+    transform: translate(-50%, -50%) scale(var(--s, 1));
+    transform-origin: center center;
+    background: transparent; overflow: hidden;
+  }
+
+  /* área central-baixa onde a thumb aparece (dentro da zona segura) */
+  .thumb-wrap {
+    position: absolute; left: 50%; bottom: 130px;
+    transform: translateX(-50%);
+    width: 100%; max-width: var(--safe);
+    display: flex; justify-content: center;
+    pointer-events: none;
+  }
+
+  /* .thumb controla o APARECER/SUMIR (loop bem espaçado, igual ritmo do da Fran) */
+  .thumb {
+    position: relative;
+    width: 380px; height: 380px;
+    opacity: 0;                       /* começa escondida; keyframes controlam */
+    transform: scale(.82);
+    animation: thumbShow var(--loop) linear infinite;
+    filter: drop-shadow(0 18px 44px rgba(0,0,0,.45))
+            drop-shadow(0 0 40px rgba(232,66,14,.22));
+  }
+  /* Num ciclo de 120s: aparece 0–10s, some o resto. Bem esparso. */
+  @keyframes thumbShow {
+    0%    { opacity: 0; transform: scale(.82); }
+    1.2%  { opacity: 1; transform: scale(1.05); }
+    2.4%  { opacity: 1; transform: scale(1); }
+    7.5%  { opacity: 1; transform: scale(1); }
+    8.6%  { opacity: 0; transform: scale(.92); }
+    100%  { opacity: 0; transform: scale(.92); }
+  }
+
+  /* .spin: gira pra sempre (fica "girando") */
+  .spin {
+    position: absolute; inset: 0;
+    animation: girar var(--spin) linear infinite;
+  }
+  @keyframes girar { to { transform: rotate(360deg); } }
+
+  .spin svg { width: 100%; height: 100%; display: block; overflow: visible; }
+  .ring-text {
+    font-family: 'Luckiest Guy', sans-serif;
+    font-size: 26px; letter-spacing: 2px;
+    fill: var(--amarelo);
+  }
+
+  /* NÚCLEO fixo no centro — não gira, fica legível */
+  .core {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; gap: 8px; padding: 0 70px;
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--vermelho); color: #fff;
+    font-weight: 700; font-size: 15px; letter-spacing: .10em; text-transform: uppercase;
+    padding: 6px 16px; border-radius: 9px; transform: rotate(-3deg);
+  }
+  .eyebrow .dot {
+    width: 10px; height: 10px; border-radius: 50%; background: var(--amarelo);
+    animation: dotPulse 2s ease-in-out infinite, ring 2s linear infinite;
+  }
+  @keyframes dotPulse { 0%,50%,100%{transform:scale(1)} 25%{transform:scale(1.15)} 75%{transform:scale(.85)} }
+  @keyframes ring { 0%{box-shadow:0 0 0 0 rgba(255,210,58,.55)} 100%{box-shadow:0 0 0 11px rgba(255,210,58,0)} }
+
+  .nome {
+    font-family: 'Luckiest Guy', sans-serif; text-transform: uppercase;
+    color: #fff; font-size: 58px; line-height: .9; margin: 2px 0;
+    text-shadow: 4px 5px 0 var(--vermelho); transform: rotate(-2deg);
+  }
+  .heart {
+    font-family: 'Noto Color Emoji', emoji; font-size: 40px; line-height: 1;
+    display: inline-block; animation: flare 3.2s ease-in-out infinite;
+  }
+  @keyframes flare {
+    0%, 38%  { transform: scale(1) rotate(0deg); filter: none; }
+    50%      { transform: scale(1.16) rotate(-4deg); filter: drop-shadow(0 0 18px rgba(255,138,46,.9)); }
+    62%      { transform: scale(1.06) rotate(3deg); filter: drop-shadow(0 0 12px rgba(255,138,46,.7)); }
+    76%, 100%{ transform: scale(1) rotate(0deg); filter: none; }
+  }
+  .titulo {
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+    color: var(--amarelo); font-size: 22px; letter-spacing: .02em;
+    text-transform: uppercase; margin: 2px 0 0;
+    text-shadow: 2px 2px 0 rgba(232,66,14,.55);
+  }
+</style>
+</head>
+<body>
+  <div id="stage">
+    <div class="thumb-wrap">
+
+      <div class="thumb">
+        <!-- SELO que gira: aro de fogo + texto curvo repetido -->
+        <div class="spin">
+          <svg viewBox="0 0 380 380">
+            <defs>
+              <linearGradient id="fogo" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0"   stop-color="#ffd23a"/>
+                <stop offset=".5"  stop-color="#ff8a2e"/>
+                <stop offset="1"   stop-color="#e8420e"/>
+              </linearGradient>
+              <!-- caminho circular pro texto correr em volta -->
+              <path id="aro" fill="none"
+                    d="M 190,190 m -148,0 a 148,148 0 1,1 296,0 a 148,148 0 1,1 -296,0"/>
+            </defs>
+
+            <!-- anel de fogo (traço pontilhado + traço cheio) -->
+            <circle cx="190" cy="190" r="172" fill="none"
+                    stroke="url(#fogo)" stroke-width="6"
+                    stroke-dasharray="3 16" stroke-linecap="round" opacity=".85"/>
+            <circle cx="190" cy="190" r="150" fill="none"
+                    stroke="url(#fogo)" stroke-width="10" opacity=".9"/>
+
+            <!-- texto curvo girando junto -->
+            <text class="ring-text">
+              <textPath href="#aro" startOffset="0">
+                DEPOIS DO TE AMO ✦ TATUAGEM FALSA ✦ DEPOIS DO TE AMO ✦ TATUAGEM FALSA ✦
+              </textPath>
+            </text>
+          </svg>
+        </div>
+
+        <!-- núcleo fixo (não gira) -->
+        <div class="core">
+          <div class="eyebrow"><span class="dot"></span> Episódio 02</div>
+          <div class="nome">Samuel</div>
+          <span class="heart">❤️‍🔥</span>
+          <p class="titulo">Tatuagem falsa</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    var stage = document.getElementById('stage');
+    function fit(){ stage.style.setProperty('--s', Math.min(innerWidth/1920, innerHeight/1080)); }
+    addEventListener('resize', fit); fit();
+  </script>
+</body>
+</html>
