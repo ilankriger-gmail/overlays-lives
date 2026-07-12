@@ -58,7 +58,7 @@
 
   /* área central-baixa onde a thumb aparece (dentro da zona segura) */
   .thumb-wrap {
-    position: absolute; left: 50%; bottom: 130px;
+    position: absolute; left: 50%; bottom: 90px;
     transform: translateX(-50%);
     width: 100%; max-width: var(--safe);
     display: flex; justify-content: center;
@@ -68,7 +68,7 @@
   /* .thumb controla o APARECER/SUMIR (loop bem espaçado, igual ritmo do da Fran) */
   .thumb {
     position: relative;
-    width: 380px; height: 380px;
+    width: 480px; height: 480px;
     opacity: 0;                       /* começa escondida; keyframes controlam */
     transform: scale(.82);
     animation: thumbShow var(--loop) linear infinite;
@@ -94,8 +94,8 @@
 
   .spin svg { width: 100%; height: 100%; display: block; overflow: visible; }
   .ring-text {
-    font-family: 'Luckiest Guy', sans-serif;
-    font-size: 26px; letter-spacing: 2px;
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+    font-size: 21px; letter-spacing: 1.5px;
     fill: var(--amarelo);
   }
 
@@ -103,29 +103,40 @@
   .core {
     position: absolute; inset: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; gap: 8px; padding: 0 70px;
+    text-align: center; gap: 4px; padding: 0 96px;
   }
-  .eyebrow {
-    display: inline-flex; align-items: center; gap: 10px;
-    background: var(--vermelho); color: #fff;
-    font-weight: 700; font-size: 15px; letter-spacing: .10em; text-transform: uppercase;
-    padding: 6px 16px; border-radius: 9px; transform: rotate(-3deg);
-  }
-  .eyebrow .dot {
-    width: 10px; height: 10px; border-radius: 50%; background: var(--amarelo);
-    animation: dotPulse 2s ease-in-out infinite, ring 2s linear infinite;
-  }
-  @keyframes dotPulse { 0%,50%,100%{transform:scale(1)} 25%{transform:scale(1.15)} 75%{transform:scale(.85)} }
-  @keyframes ring { 0%{box-shadow:0 0 0 0 rgba(255,210,58,.55)} 100%{box-shadow:0 0 0 11px rgba(255,210,58,0)} }
 
-  .nome {
-    font-family: 'Luckiest Guy', sans-serif; text-transform: uppercase;
-    color: #fff; font-size: 58px; line-height: .9; margin: 2px 0;
-    text-shadow: 4px 5px 0 var(--vermelho); transform: rotate(-2deg);
+  /* logo — reticências antes do coração em chamas (igual identidade do da Fran) */
+  .logo {
+    transform: rotate(-2.5deg);
+    font-family: 'Luckiest Guy', sans-serif; text-transform: uppercase; line-height: .9;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
   }
+  .logo__top {
+    font-size: 24px; color: var(--amarelo);
+    text-shadow: 3px 3px 0 rgba(232,66,14,.55);
+  }
+  .logo__teamo {
+    font-size: 76px; color: #fff; white-space: nowrap;
+    text-shadow: 4px 6px 0 var(--vermelho);
+  }
+  .dots { display: inline-flex; align-items: center; gap: 12px; margin-top: 2px; }
+  .d { border-radius: 50%; display: inline-block; }
+  .d1 { width: 13px; height: 13px; animation: acende1 3.2s ease-in-out infinite; }
+  .d2 { width: 17px; height: 17px; animation: acende2 3.2s ease-in-out infinite; }
   .heart {
     font-family: 'Noto Color Emoji', emoji; font-size: 40px; line-height: 1;
     display: inline-block; animation: flare 3.2s ease-in-out infinite;
+  }
+  @keyframes acende1 {
+    0%, 8%   { background: var(--apagado); box-shadow: none; }
+    18%, 82% { background: var(--laranja); box-shadow: 0 0 16px rgba(255,138,46,.85); }
+    94%,100% { background: var(--apagado); box-shadow: none; }
+  }
+  @keyframes acende2 {
+    0%, 24%  { background: var(--apagado); box-shadow: none; }
+    34%, 82% { background: var(--amarelo); box-shadow: 0 0 20px rgba(255,210,58,.85); }
+    94%,100% { background: var(--apagado); box-shadow: none; }
   }
   @keyframes flare {
     0%, 38%  { transform: scale(1) rotate(0deg); filter: none; }
@@ -133,11 +144,23 @@
     62%      { transform: scale(1.06) rotate(3deg); filter: drop-shadow(0 0 12px rgba(255,138,46,.7)); }
     76%, 100%{ transform: scale(1) rotate(0deg); filter: none; }
   }
-  .titulo {
-    font-family: 'Space Grotesk', sans-serif; font-weight: 700;
-    color: var(--amarelo); font-size: 22px; letter-spacing: .02em;
-    text-transform: uppercase; margin: 2px 0 0;
-    text-shadow: 2px 2px 0 rgba(232,66,14,.55);
+
+  /* divisor de fogo */
+  .divisor {
+    width: 120px; height: 3px; margin: 12px 0 8px; border-radius: 2px;
+    background: linear-gradient(90deg, transparent, var(--laranja), var(--vermelho), var(--laranja), transparent);
+  }
+
+  /* episódio deste programa */
+  .ep {
+    font-family: 'Space Grotesk', sans-serif; font-weight: 600;
+    color: var(--cinza); font-size: 18px; letter-spacing: .08em; text-transform: uppercase;
+  }
+  .ep b { color: var(--amarelo); font-weight: 700; }
+  .ep-titulo {
+    font-family: 'Luckiest Guy', sans-serif; text-transform: uppercase;
+    color: #fff; font-size: 34px; line-height: .95; margin-top: 3px;
+    text-shadow: 3px 4px 0 var(--vermelho); transform: rotate(-1.5deg);
   }
 </style>
 </head>
@@ -146,9 +169,9 @@
     <div class="thumb-wrap">
 
       <div class="thumb">
-        <!-- SELO que gira: aro de fogo + texto curvo repetido -->
+        <!-- SELO que gira: aro de fogo + a frase que explica o programa correndo em volta -->
         <div class="spin">
-          <svg viewBox="0 0 380 380">
+          <svg viewBox="0 0 480 480">
             <defs>
               <linearGradient id="fogo" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0"   stop-color="#ffd23a"/>
@@ -157,31 +180,41 @@
               </linearGradient>
               <!-- caminho circular pro texto correr em volta -->
               <path id="aro" fill="none"
-                    d="M 190,190 m -148,0 a 148,148 0 1,1 296,0 a 148,148 0 1,1 -296,0"/>
+                    d="M 240,240 m -200,0 a 200,200 0 1,1 400,0 a 200,200 0 1,1 -400,0"/>
             </defs>
 
             <!-- anel de fogo (traço pontilhado + traço cheio) -->
-            <circle cx="190" cy="190" r="172" fill="none"
+            <circle cx="240" cy="240" r="228" fill="none"
                     stroke="url(#fogo)" stroke-width="6"
                     stroke-dasharray="3 16" stroke-linecap="round" opacity=".85"/>
-            <circle cx="190" cy="190" r="150" fill="none"
-                    stroke="url(#fogo)" stroke-width="10" opacity=".9"/>
+            <circle cx="240" cy="240" r="216" fill="none"
+                    stroke="url(#fogo)" stroke-width="9" opacity=".9"/>
 
-            <!-- texto curvo girando junto -->
+            <!-- frase que explica o programa, curva e girando junto -->
             <text class="ring-text">
               <textPath href="#aro" startOffset="0">
-                DEPOIS DO TE AMO ✦ TATUAGEM FALSA ✦ DEPOIS DO TE AMO ✦ TATUAGEM FALSA ✦
+                CONVERSAS DE VERDADE SOBRE O QUE VEM DEPOIS DO “TE AMO” ✦ VOCÊ ESTÁ ASSISTINDO ✦
               </textPath>
             </text>
           </svg>
         </div>
 
-        <!-- núcleo fixo (não gira) -->
+        <!-- núcleo fixo (não gira): marca clara + episódio -->
         <div class="core">
-          <div class="eyebrow"><span class="dot"></span> Episódio 02</div>
-          <div class="nome">Samuel</div>
-          <span class="heart">❤️‍🔥</span>
-          <p class="titulo">Tatuagem falsa</p>
+          <div class="logo">
+            <div class="logo__top">Depois do</div>
+            <div class="logo__teamo">te amo</div>
+            <div class="dots">
+              <span class="d d1"></span>
+              <span class="d d2"></span>
+              <span class="heart">❤️‍🔥</span>
+            </div>
+          </div>
+
+          <div class="divisor"></div>
+
+          <div class="ep">Episódio 02 · <b>Samuel</b></div>
+          <div class="ep-titulo">“Tatuagem falsa”</div>
         </div>
       </div>
 
