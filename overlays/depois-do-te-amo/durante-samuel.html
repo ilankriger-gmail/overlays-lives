@@ -41,6 +41,8 @@
     --loop: 120s;
     /* Tamanho do cartão (escala tudo junto). */
     --tam: 1;
+    /* Quanto desce do centro (maior = mais pra baixo). */
+    --desce: 90px;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -60,7 +62,7 @@
   /* cartão CENTRALIZADO na tela (meio do 1920x1080 = meio do corte vertical) */
   .thumb-wrap {
     position: absolute; left: 50%; top: 50%;
-    transform: translate(-50%, -50%) scale(var(--tam));
+    transform: translate(-50%, calc(-50% + var(--desce))) scale(var(--tam));
     pointer-events: none;
   }
 
@@ -86,8 +88,8 @@
     gap: 4px;
     padding: 26px 34px 30px;
     border-radius: 20px;
-    /* fundo BEM sólido (pouca transparência) */
-    background: linear-gradient(160deg, rgba(26,20,15,.95), rgba(14,11,10,.94));
+    /* fundo sólido com um toque de transparência (câmera aparece de leve atrás) */
+    background: linear-gradient(160deg, rgba(26,20,15,.80), rgba(14,11,10,.78));
     border: 1.5px solid rgba(255,138,46,.5);
     box-shadow:
       0 18px 44px rgba(0,0,0,.5),
