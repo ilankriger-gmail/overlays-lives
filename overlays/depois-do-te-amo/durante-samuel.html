@@ -7,18 +7,17 @@
 
 <!--
   Inspirado no durante.html (edição da Fran): overlay TRANSPARENTE pra ficar POR
-  CIMA da câmera durante a live inteira. Mesma ideia de aparecer de vez em quando
-  e some por muito tempo (tela limpa), mesma zona segura central-baixa.
+  CIMA da câmera durante a live inteira. Aparece de vez em quando e some por muito
+  tempo (tela limpa), na zona segura central (sobrevive ao corte vertical 9:16).
 
-  Diferença: aqui é UMA thumb só — um SELO/CARIMBO circular que fica GIRANDO.
-  Ele sobe girando, fica ~10s e SOME por ~110s. Episódio: Samuel · "Tatuagem falsa".
-
-  DUPLA TRANSMISSÃO (horizontal + vertical): a thumb vive na "zona segura" central
-  (--safe), então sobrevive ao corte 9:16 do meio da tela.
+  Aqui é UM cartão RETANGULAR (fundo bem sólido) que fica GIRANDO devagar.
+  Ele aparece ~10s e SOME por ~110s. Episódio: Samuel · "Tatuagem falsa".
 
   No OBS: Browser Source 1920x1080, fundo transparente (não marque "cor de fundo"),
-  este source ACIMA da câmera. Pra trocar textos, edite os blocos lá embaixo.
-  Pra aparecer mais/menos vezes, mude --loop. Pra girar mais rápido, diminua --spin.
+  este source ACIMA da câmera. Ajustes rápidos nas variáveis --* abaixo:
+    --loop  = de quanto em quanto tempo aparece (maior = mais raro)
+    --spin  = tempo de uma volta completa (maior = gira mais devagar; some pra parar)
+    --top   = altura na tela (menor = mais pra cima)
 -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,11 +34,12 @@
     --cinza: #cabfb0;
     /* Zona segura central (corte vertical 9:16 de 1080 ≈ 608px). */
     --safe: 600px;
-    /* Ciclo completo: thumb aparece ~10s e some por ~110s de TELA LIMPA.
-       Aumente pra espaçar ainda mais. */
+    /* Ciclo: cartão aparece ~10s e some por ~110s de TELA LIMPA. */
     --loop: 120s;
-    /* Tempo de uma volta completa do selo (menor = gira mais rápido). */
-    --spin: 12s;
+    /* Tempo de uma volta completa (maior = gira mais devagar). */
+    --spin: 20s;
+    /* Altura do cartão na tela (menor = mais pra cima). */
+    --top: 200px;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -56,9 +56,9 @@
     background: transparent; overflow: hidden;
   }
 
-  /* área central-baixa onde a thumb aparece (dentro da zona segura) */
+  /* posição do cartão (mais pra cima, dentro da zona segura horizontal) */
   .thumb-wrap {
-    position: absolute; left: 50%; bottom: 90px;
+    position: absolute; left: 50%; top: var(--top);
     transform: translateX(-50%);
     width: 100%; max-width: var(--safe);
     display: flex; justify-content: center;
@@ -67,65 +67,78 @@
 
   /* .thumb controla o APARECER/SUMIR (loop bem espaçado, igual ritmo do da Fran) */
   .thumb {
-    position: relative;
-    width: 480px; height: 480px;
-    opacity: 0;                       /* começa escondida; keyframes controlam */
-    transform: scale(.82);
+    opacity: 0;                       /* começa escondido; keyframes controlam */
     animation: thumbShow var(--loop) linear infinite;
-    filter: drop-shadow(0 18px 44px rgba(0,0,0,.45))
-            drop-shadow(0 0 40px rgba(232,66,14,.22));
   }
   /* Num ciclo de 120s: aparece 0–10s, some o resto. Bem esparso. */
   @keyframes thumbShow {
-    0%    { opacity: 0; transform: scale(.82); }
-    1.2%  { opacity: 1; transform: scale(1.05); }
-    2.4%  { opacity: 1; transform: scale(1); }
-    7.5%  { opacity: 1; transform: scale(1); }
-    8.6%  { opacity: 0; transform: scale(.92); }
-    100%  { opacity: 0; transform: scale(.92); }
+    0%    { opacity: 0; }
+    1.2%  { opacity: 1; }
+    7.8%  { opacity: 1; }
+    9%    { opacity: 0; }
+    100%  { opacity: 0; }
   }
 
-  /* .spin: gira pra sempre (fica "girando") */
-  .spin {
-    position: absolute; inset: 0;
+  /* CARTÃO retangular sólido, girando devagar */
+  .plaque {
+    position: relative;
+    width: 560px;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    gap: 6px;
+    padding: 34px 44px 38px;
+    border-radius: 24px;
+    /* fundo BEM sólido (pouca transparência) */
+    background: linear-gradient(160deg, rgba(26,20,15,.95), rgba(14,11,10,.94));
+    border: 1.5px solid rgba(255,138,46,.5);
+    box-shadow:
+      0 20px 50px rgba(0,0,0,.5),
+      0 0 46px rgba(232,66,14,.22),
+      inset 0 0 0 1px rgba(255,210,58,.08);
+    overflow: hidden;
     animation: girar var(--spin) linear infinite;
+    transform-origin: center center;
   }
   @keyframes girar { to { transform: rotate(360deg); } }
-
-  .spin svg { width: 100%; height: 100%; display: block; overflow: visible; }
-  .ring-text {
-    font-family: 'Space Grotesk', sans-serif; font-weight: 700;
-    font-size: 21px; letter-spacing: 1.5px;
-    fill: var(--amarelo);
+  /* fiozinho de fogo no topo do cartão */
+  .plaque::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px;
+    background: linear-gradient(90deg, var(--amarelo), var(--laranja) 55%, var(--vermelho));
   }
 
-  /* NÚCLEO fixo no centro — não gira, fica legível */
-  .core {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; gap: 4px; padding: 0 96px;
+  /* etiqueta de cima */
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 11px;
+    background: var(--amarelo); color: var(--tinta);
+    font-weight: 700; font-size: 17px; letter-spacing: .09em; text-transform: uppercase;
+    padding: 8px 20px; border-radius: 10px; transform: rotate(-2deg); margin-bottom: 4px;
   }
+  .eyebrow .dot {
+    width: 12px; height: 12px; border-radius: 50%; background: var(--vermelho);
+    animation: dotPulse 2s ease-in-out infinite, ring 2s linear infinite;
+  }
+  @keyframes dotPulse { 0%,50%,100%{transform:scale(1)} 25%{transform:scale(1.15)} 75%{transform:scale(.85)} }
+  @keyframes ring { 0%{box-shadow:0 0 0 0 rgba(232,66,14,.55)} 100%{box-shadow:0 0 0 12px rgba(232,66,14,0)} }
 
-  /* logo — reticências antes do coração em chamas (igual identidade do da Fran) */
+  /* logo — reticências antes do coração em chamas */
   .logo {
     transform: rotate(-2.5deg);
     font-family: 'Luckiest Guy', sans-serif; text-transform: uppercase; line-height: .9;
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
   }
   .logo__top {
-    font-size: 24px; color: var(--amarelo);
+    font-size: 26px; color: var(--amarelo);
     text-shadow: 3px 3px 0 rgba(232,66,14,.55);
   }
   .logo__teamo {
-    font-size: 76px; color: #fff; white-space: nowrap;
+    font-size: 78px; color: #fff; white-space: nowrap;
     text-shadow: 4px 6px 0 var(--vermelho);
   }
-  .dots { display: inline-flex; align-items: center; gap: 12px; margin-top: 2px; }
+  .dots { display: inline-flex; align-items: center; gap: 14px; margin-top: 4px; }
   .d { border-radius: 50%; display: inline-block; }
-  .d1 { width: 13px; height: 13px; animation: acende1 3.2s ease-in-out infinite; }
-  .d2 { width: 17px; height: 17px; animation: acende2 3.2s ease-in-out infinite; }
+  .d1 { width: 14px; height: 14px; animation: acende1 3.2s ease-in-out infinite; }
+  .d2 { width: 18px; height: 18px; animation: acende2 3.2s ease-in-out infinite; }
   .heart {
-    font-family: 'Noto Color Emoji', emoji; font-size: 40px; line-height: 1;
+    font-family: 'Noto Color Emoji', emoji; font-size: 46px; line-height: 1;
     display: inline-block; animation: flare 3.2s ease-in-out infinite;
   }
   @keyframes acende1 {
@@ -145,9 +158,15 @@
     76%, 100%{ transform: scale(1) rotate(0deg); filter: none; }
   }
 
+  /* frase que explica o programa */
+  .tagline {
+    font-size: 20px; font-weight: 500; color: var(--cinza); margin: 8px 0 0; line-height: 1.4;
+  }
+  .tagline b { color: #fff; font-weight: 700; }
+
   /* divisor de fogo */
   .divisor {
-    width: 120px; height: 3px; margin: 12px 0 8px; border-radius: 2px;
+    width: 150px; height: 3px; margin: 16px 0 6px; border-radius: 2px;
     background: linear-gradient(90deg, transparent, var(--laranja), var(--vermelho), var(--laranja), transparent);
   }
 
@@ -159,7 +178,7 @@
   .ep b { color: var(--amarelo); font-weight: 700; }
   .ep-titulo {
     font-family: 'Luckiest Guy', sans-serif; text-transform: uppercase;
-    color: #fff; font-size: 34px; line-height: .95; margin-top: 3px;
+    color: #fff; font-size: 40px; line-height: .95; margin-top: 4px;
     text-shadow: 3px 4px 0 var(--vermelho); transform: rotate(-1.5deg);
   }
 </style>
@@ -169,38 +188,9 @@
     <div class="thumb-wrap">
 
       <div class="thumb">
-        <!-- SELO que gira: aro de fogo + a frase que explica o programa correndo em volta -->
-        <div class="spin">
-          <svg viewBox="0 0 480 480">
-            <defs>
-              <linearGradient id="fogo" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0"   stop-color="#ffd23a"/>
-                <stop offset=".5"  stop-color="#ff8a2e"/>
-                <stop offset="1"   stop-color="#e8420e"/>
-              </linearGradient>
-              <!-- caminho circular pro texto correr em volta -->
-              <path id="aro" fill="none"
-                    d="M 240,240 m -200,0 a 200,200 0 1,1 400,0 a 200,200 0 1,1 -400,0"/>
-            </defs>
+        <div class="plaque">
+          <div class="eyebrow"><span class="dot"></span> Você está assistindo</div>
 
-            <!-- anel de fogo (traço pontilhado + traço cheio) -->
-            <circle cx="240" cy="240" r="228" fill="none"
-                    stroke="url(#fogo)" stroke-width="6"
-                    stroke-dasharray="3 16" stroke-linecap="round" opacity=".85"/>
-            <circle cx="240" cy="240" r="216" fill="none"
-                    stroke="url(#fogo)" stroke-width="9" opacity=".9"/>
-
-            <!-- frase que explica o programa, curva e girando junto -->
-            <text class="ring-text">
-              <textPath href="#aro" startOffset="0">
-                CONVERSAS DE VERDADE SOBRE O QUE VEM DEPOIS DO “TE AMO” ✦ VOCÊ ESTÁ ASSISTINDO ✦
-              </textPath>
-            </text>
-          </svg>
-        </div>
-
-        <!-- núcleo fixo (não gira): marca clara + episódio -->
-        <div class="core">
           <div class="logo">
             <div class="logo__top">Depois do</div>
             <div class="logo__teamo">te amo</div>
@@ -210,6 +200,8 @@
               <span class="heart">❤️‍🔥</span>
             </div>
           </div>
+
+          <p class="tagline">Conversas de verdade sobre o que vem<br><b>depois</b> do “te amo”.</p>
 
           <div class="divisor"></div>
 
