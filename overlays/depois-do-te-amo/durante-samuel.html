@@ -8,16 +8,19 @@
 <!--
   Inspirado no durante.html (edição da Fran): overlay TRANSPARENTE pra ficar POR
   CIMA da câmera durante a live inteira. Aparece de vez em quando e some por muito
-  tempo (tela limpa), na zona segura central (sobrevive ao corte vertical 9:16).
+  tempo (tela limpa).
 
-  Aqui é UM cartão RETANGULAR (fundo bem sólido) que fica GIRANDO devagar.
-  Ele aparece ~10s e SOME por ~110s. Episódio: Samuel · "Tatuagem falsa".
+  Transmissão HORIZONTAL (1920x1080): o cartão fica CENTRALIZADO na tela.
+  Transmissão VERTICAL: você corta o CENTRO da tela — o cartão está bem no meio,
+  dentro da zona segura (--safe), então cabe inteiro no corte 9:16.
+
+  Cartão RETANGULAR, fundo bem sólido, PARADO (não gira). Aparece ~10s e some ~110s.
+  Episódio: Samuel · "Tatuagem falsa".
 
   No OBS: Browser Source 1920x1080, fundo transparente (não marque "cor de fundo"),
-  este source ACIMA da câmera. Ajustes rápidos nas variáveis --* abaixo:
+  este source ACIMA da câmera. Ajustes rápidos:
     --loop  = de quanto em quanto tempo aparece (maior = mais raro)
-    --spin  = tempo de uma volta completa (maior = gira mais devagar; some pra parar)
-    --top   = altura na tela (menor = mais pra cima)
+    --tam   = tamanho do cartão (maior = maior)
 -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,10 +39,8 @@
     --safe: 600px;
     /* Ciclo: cartão aparece ~10s e some por ~110s de TELA LIMPA. */
     --loop: 120s;
-    /* Tempo de uma volta completa (maior = gira mais devagar). */
-    --spin: 20s;
-    /* Altura do cartão na tela (menor = mais pra cima). */
-    --top: 200px;
+    /* Tamanho do cartão (escala tudo junto). */
+    --tam: 1;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -56,12 +57,10 @@
     background: transparent; overflow: hidden;
   }
 
-  /* posição do cartão (mais pra cima, dentro da zona segura horizontal) */
+  /* cartão CENTRALIZADO na tela (meio do 1920x1080 = meio do corte vertical) */
   .thumb-wrap {
-    position: absolute; left: 50%; top: var(--top);
-    transform: translateX(-50%);
-    width: 100%; max-width: var(--safe);
-    display: flex; justify-content: center;
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%) scale(var(--tam));
     pointer-events: none;
   }
 
@@ -72,114 +71,111 @@
   }
   /* Num ciclo de 120s: aparece 0–10s, some o resto. Bem esparso. */
   @keyframes thumbShow {
-    0%    { opacity: 0; }
-    1.2%  { opacity: 1; }
-    7.8%  { opacity: 1; }
-    9%    { opacity: 0; }
-    100%  { opacity: 0; }
+    0%    { opacity: 0; transform: translateY(14px); }
+    1%    { opacity: 1; transform: translateY(0); }
+    7.8%  { opacity: 1; transform: translateY(0); }
+    9%    { opacity: 0; transform: translateY(-12px); }
+    100%  { opacity: 0; transform: translateY(-12px); }
   }
 
-  /* CARTÃO retangular sólido, girando devagar */
+  /* CARTÃO retangular sólido, PARADO */
   .plaque {
     position: relative;
-    width: 560px;
+    width: 430px;
     display: flex; flex-direction: column; align-items: center; text-align: center;
-    gap: 6px;
-    padding: 34px 44px 38px;
-    border-radius: 24px;
+    gap: 4px;
+    padding: 26px 34px 30px;
+    border-radius: 20px;
     /* fundo BEM sólido (pouca transparência) */
     background: linear-gradient(160deg, rgba(26,20,15,.95), rgba(14,11,10,.94));
     border: 1.5px solid rgba(255,138,46,.5);
     box-shadow:
-      0 20px 50px rgba(0,0,0,.5),
-      0 0 46px rgba(232,66,14,.22),
+      0 18px 44px rgba(0,0,0,.5),
+      0 0 40px rgba(232,66,14,.2),
       inset 0 0 0 1px rgba(255,210,58,.08);
     overflow: hidden;
-    animation: girar var(--spin) linear infinite;
-    transform-origin: center center;
   }
-  @keyframes girar { to { transform: rotate(360deg); } }
   /* fiozinho de fogo no topo do cartão */
   .plaque::before {
-    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px;
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px;
     background: linear-gradient(90deg, var(--amarelo), var(--laranja) 55%, var(--vermelho));
   }
 
   /* etiqueta de cima */
   .eyebrow {
-    display: inline-flex; align-items: center; gap: 11px;
+    display: inline-flex; align-items: center; gap: 9px;
     background: var(--amarelo); color: var(--tinta);
-    font-weight: 700; font-size: 17px; letter-spacing: .09em; text-transform: uppercase;
-    padding: 8px 20px; border-radius: 10px; transform: rotate(-2deg); margin-bottom: 4px;
+    font-weight: 700; font-size: 14px; letter-spacing: .08em; text-transform: uppercase;
+    padding: 6px 16px; border-radius: 9px; transform: rotate(-2deg); margin-bottom: 4px;
   }
   .eyebrow .dot {
-    width: 12px; height: 12px; border-radius: 50%; background: var(--vermelho);
+    width: 10px; height: 10px; border-radius: 50%; background: var(--vermelho);
     animation: dotPulse 2s ease-in-out infinite, ring 2s linear infinite;
   }
   @keyframes dotPulse { 0%,50%,100%{transform:scale(1)} 25%{transform:scale(1.15)} 75%{transform:scale(.85)} }
-  @keyframes ring { 0%{box-shadow:0 0 0 0 rgba(232,66,14,.55)} 100%{box-shadow:0 0 0 12px rgba(232,66,14,0)} }
+  @keyframes ring { 0%{box-shadow:0 0 0 0 rgba(232,66,14,.55)} 100%{box-shadow:0 0 0 10px rgba(232,66,14,0)} }
 
   /* logo — reticências antes do coração em chamas */
   .logo {
     transform: rotate(-2.5deg);
     font-family: 'Luckiest Guy', sans-serif; text-transform: uppercase; line-height: .9;
-    display: flex; flex-direction: column; align-items: center; gap: 5px;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
   }
   .logo__top {
-    font-size: 26px; color: var(--amarelo);
-    text-shadow: 3px 3px 0 rgba(232,66,14,.55);
+    font-size: 20px; color: var(--amarelo);
+    text-shadow: 2px 2px 0 rgba(232,66,14,.55);
   }
   .logo__teamo {
-    font-size: 78px; color: #fff; white-space: nowrap;
-    text-shadow: 4px 6px 0 var(--vermelho);
+    font-size: 58px; color: #fff; white-space: nowrap;
+    text-shadow: 3px 5px 0 var(--vermelho);
   }
-  .dots { display: inline-flex; align-items: center; gap: 14px; margin-top: 4px; }
+  .dots { display: inline-flex; align-items: center; gap: 11px; margin-top: 3px; }
   .d { border-radius: 50%; display: inline-block; }
-  .d1 { width: 14px; height: 14px; animation: acende1 3.2s ease-in-out infinite; }
-  .d2 { width: 18px; height: 18px; animation: acende2 3.2s ease-in-out infinite; }
+  .d1 { width: 11px; height: 11px; animation: acende1 3.2s ease-in-out infinite; }
+  .d2 { width: 14px; height: 14px; animation: acende2 3.2s ease-in-out infinite; }
   .heart {
-    font-family: 'Noto Color Emoji', emoji; font-size: 46px; line-height: 1;
+    font-family: 'Noto Color Emoji', emoji; font-size: 34px; line-height: 1;
     display: inline-block; animation: flare 3.2s ease-in-out infinite;
   }
   @keyframes acende1 {
     0%, 8%   { background: var(--apagado); box-shadow: none; }
-    18%, 82% { background: var(--laranja); box-shadow: 0 0 16px rgba(255,138,46,.85); }
+    18%, 82% { background: var(--laranja); box-shadow: 0 0 14px rgba(255,138,46,.85); }
     94%,100% { background: var(--apagado); box-shadow: none; }
   }
   @keyframes acende2 {
     0%, 24%  { background: var(--apagado); box-shadow: none; }
-    34%, 82% { background: var(--amarelo); box-shadow: 0 0 20px rgba(255,210,58,.85); }
+    34%, 82% { background: var(--amarelo); box-shadow: 0 0 18px rgba(255,210,58,.85); }
     94%,100% { background: var(--apagado); box-shadow: none; }
   }
   @keyframes flare {
     0%, 38%  { transform: scale(1) rotate(0deg); filter: none; }
-    50%      { transform: scale(1.16) rotate(-4deg); filter: drop-shadow(0 0 18px rgba(255,138,46,.9)); }
-    62%      { transform: scale(1.06) rotate(3deg); filter: drop-shadow(0 0 12px rgba(255,138,46,.7)); }
+    50%      { transform: scale(1.16) rotate(-4deg); filter: drop-shadow(0 0 16px rgba(255,138,46,.9)); }
+    62%      { transform: scale(1.06) rotate(3deg); filter: drop-shadow(0 0 10px rgba(255,138,46,.7)); }
     76%, 100%{ transform: scale(1) rotate(0deg); filter: none; }
   }
 
   /* frase que explica o programa */
   .tagline {
-    font-size: 20px; font-weight: 500; color: var(--cinza); margin: 8px 0 0; line-height: 1.4;
+    font-size: 16px; font-weight: 500; color: var(--cinza); margin: 6px 0 0; line-height: 1.4;
   }
   .tagline b { color: #fff; font-weight: 700; }
 
   /* divisor de fogo */
   .divisor {
-    width: 150px; height: 3px; margin: 16px 0 6px; border-radius: 2px;
+    width: 120px; height: 3px; margin: 12px 0 5px; border-radius: 2px;
     background: linear-gradient(90deg, transparent, var(--laranja), var(--vermelho), var(--laranja), transparent);
   }
 
   /* episódio deste programa */
   .ep {
     font-family: 'Space Grotesk', sans-serif; font-weight: 600;
-    color: var(--cinza); font-size: 18px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--cinza); font-size: 15px; letter-spacing: .07em; text-transform: uppercase;
   }
   .ep b { color: var(--amarelo); font-weight: 700; }
   .ep-titulo {
     font-family: 'Luckiest Guy', sans-serif; text-transform: uppercase;
-    color: #fff; font-size: 40px; line-height: .95; margin-top: 4px;
-    text-shadow: 3px 4px 0 var(--vermelho); transform: rotate(-1.5deg);
+    color: #fff; font-size: 30px; line-height: .95; margin-top: 3px;
+    text-shadow: 2px 3px 0 var(--vermelho); transform: rotate(-1.5deg);
   }
 </style>
 </head>
