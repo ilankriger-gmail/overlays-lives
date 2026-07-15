@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Depois do Te Amo — durante a live (Celso · Trocou um lanche por uma nova vida)</title>
+
+<!--
+  Inspirado no durante.html (edição da Fran): overlay TRANSPARENTE pra ficar POR
+  CIMA da câmera durante a live inteira. Aparece de vez em quando e some por muito
+  tempo (tela limpa).
+
+  Transmissão HORIZONTAL (1920x1080): o cartão fica CENTRALIZADO na tela.
+  Transmissão VERTICAL: você corta o CENTRO da tela — o cartão está bem no meio,
+  dentro da zona segura (--safe), então cabe inteiro no corte 9:16.
+
+  Cartão RETANGULAR, fundo bem sólido, PARADO (não gira). Aparece ~10s e some ~110s.
+  Episódio: Celso · "Trocou um lanche por uma nova vida".
+
+  No OBS: Browser Source 1920x1080, fundo transparente (não marque "cor de fundo"),
+  este source ACIMA da câmera. Ajustes rápidos:
+    --loop  = de quanto em quanto tempo aparece (maior = mais raro)
+    --tam   = tamanho do cartão (maior = maior)
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Noto+Color+Emoji&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --tinta: #17130f;
+    --amarelo: #ffd23a;
+    --laranja: #ff8a2e;
+    --vermelho: #e8420e;
+    --apagado: #5a4a3a;
+    --cinza: #cabfb0;
+    /* Zona segura central (corte vertical 9:16 de 1080 ≈ 608px). */
+    --safe: 600px;
+    /* Ciclo: cartão aparece ~10s e some por ~110s de TELA LIMPA. */
+    --loop: 120s;
+    /* Tamanho do cartão (escala tudo junto). */
+    --tam: 1;
+    /* Quanto desce do centro (maior = mais pra baixo). */
+    --desce: 90px;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%;
+    background: transparent;          /* TRANSPARENTE: mostra a câmera atrás */
+    overflow: hidden;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  #stage {
+    position: absolute; top: 50%; left: 50%;
+    width: 1920px; height: 1080px;
+    transform: translate(-50%, -50%) scale(var(--s, 1));
+    transform-origin: center center;
+    background: transparent; overflow: hidden;
+  }
+
+  /* cartão CENTRALIZADO na tela (meio do 1920x1080 = meio do corte vertical) */
+  .thumb-wrap {
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, calc(-50% + var(--desce))) scale(var(--tam));
+    pointer-events: none;
+  }
+
+  /* .thumb controla o APARECER/SUMIR (loop bem espaçado, igual ritmo do da Fran) */
+  .thumb {
+    opacity: 0;                       /* começa escondido; keyframes controlam */
+    animation: thumbShow var(--loop) linear infinite;
+  }
+  /* Num ciclo de 120s: aparece 0–10s, some o resto. Bem esparso. */
+  @keyframes thumbShow {
+    0%    { opacity: 0; transform: translateY(14px); }
+    1%    { opacity: 1; transform: translateY(0); }
+    7.8%  { opacity: 1; transform: translateY(0); }
+    9%    { opacity: 0; transform: translateY(-12px); }
+    100%  { opacity: 0; transform: translateY(-12px); }
+  }
+
+  /* CARTÃO retangular sólido, PARADO */
+  .plaque {
+    position: relative;
+    width: 430px;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    gap: 4px;
+    padding: 26px 34px 30px;
+    border-radius: 20px;
+    /* fundo sólido com um toque de transparência (câmera aparece de leve atrás) */
+    background: linear-gradient(160deg, rgba(26,20,15,.80), rgba(14,11,10,.78));
+    border: 1.5px solid rgba(255,138,46,.5);
+    box-shadow:
+      0 18px 44px rgba(0,0,0,.5),
+      0 0 40px rgba(232,66,14,.2),
+      inset 0 0 0 1px rgba(255,210,58,.08);
+    overflow: hidden;
+  }
+  /* fiozinho de fogo no topo do cartão */
+  .plaque::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    background: linear-gradient(90deg, var(--amarelo), var(--laranja) 55%, var(--vermelho));
+  }
+
+  /* etiqueta de cima */
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 9px;
+    background: var(--amarelo); color: var(--tinta);
+    font-weight: 700; font-size: 14px; letter-spacing: .08em; text-transform: uppercase;
+    padding: 6px 16px; border-radius: 9px; transform: rotate(-2deg); margin-bottom: 4px;
+  }
+  .eyebrow .dot {
+    width: 10px; height: 10px; border-radius: 50%; background: var(--vermelho);
+    animation: dotPulse 2s ease-in-out infinite, ring 2s linear infinite;
+  }
+  @keyframes dotPulse { 0%,50%,100%{transform:scale(1)} 25%{transform:scale(1.15)} 75%{transform:scale(.85)} }
+  @keyframes ring { 0%{box-shadow:0 0 0 0 rgba(232,66,14,.55)} 100%{box-shadow:0 0 0 10px rgba(232,66,14,0)} }
+
+  /* logo — reticências antes do coração em chamas */
+  .logo {
+    transform: rotate(-2.5deg);
+    font-family: 'Luckiest Guy', sans-serif; text-transform: uppercase; line-height: .9;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .logo__top {
+    font-size: 20px; color: var(--amarelo);
+    text-shadow: 2px 2px 0 rgba(232,66,14,.55);
+  }
+  .logo__teamo {
+    font-size: 58px; color: #fff; white-space: nowrap;
+    text-shadow: 3px 5px 0 var(--vermelho);
+  }
+  .dots { display: inline-flex; align-items: center; gap: 11px; margin-top: 3px; }
+  .d { border-radius: 50%; display: inline-block; }
+  .d1 { width: 11px; height: 11px; animation: acende1 3.2s ease-in-out infinite; }
+  .d2 { width: 14px; height: 14px; animation: acende2 3.2s ease-in-out infinite; }
+  .heart {
+    font-family: 'Noto Color Emoji', emoji; font-size: 34px; line-height: 1;
+    display: inline-block; animation: flare 3.2s ease-in-out infinite;
+  }
+  @keyframes acende1 {
+    0%, 8%   { background: var(--apagado); box-shadow: none; }
+    18%, 82% { background: var(--laranja); box-shadow: 0 0 14px rgba(255,138,46,.85); }
+    94%,100% { background: var(--apagado); box-shadow: none; }
+  }
+  @keyframes acende2 {
+    0%, 24%  { background: var(--apagado); box-shadow: none; }
+    34%, 82% { background: var(--amarelo); box-shadow: 0 0 18px rgba(255,210,58,.85); }
+    94%,100% { background: var(--apagado); box-shadow: none; }
+  }
+  @keyframes flare {
+    0%, 38%  { transform: scale(1) rotate(0deg); filter: none; }
+    50%      { transform: scale(1.16) rotate(-4deg); filter: drop-shadow(0 0 16px rgba(255,138,46,.9)); }
+    62%      { transform: scale(1.06) rotate(3deg); filter: drop-shadow(0 0 10px rgba(255,138,46,.7)); }
+    76%, 100%{ transform: scale(1) rotate(0deg); filter: none; }
+  }
+
+  /* frase que explica o programa */
+  .tagline {
+    font-size: 16px; font-weight: 500; color: var(--cinza); margin: 6px 0 0; line-height: 1.4;
+  }
+  .tagline b { color: #fff; font-weight: 700; }
+
+  /* divisor de fogo */
+  .divisor {
+    width: 120px; height: 3px; margin: 12px 0 5px; border-radius: 2px;
+    background: linear-gradient(90deg, transparent, var(--laranja), var(--vermelho), var(--laranja), transparent);
+  }
+
+  /* episódio deste programa */
+  .ep {
+    font-family: 'Space Grotesk', sans-serif; font-weight: 600;
+    color: var(--cinza); font-size: 15px; letter-spacing: .07em; text-transform: uppercase;
+  }
+  .ep b { color: var(--amarelo); font-weight: 700; }
+  .ep-titulo {
+    font-family: 'Luckiest Guy', sans-serif; text-transform: uppercase;
+    color: #fff; font-size: 30px; line-height: .95; margin-top: 3px;
+    text-shadow: 2px 3px 0 var(--vermelho); transform: rotate(-1.5deg);
+  }
+</style>
+</head>
+<body>
+  <div id="stage">
+    <div class="thumb-wrap">
+
+      <div class="thumb">
+        <div class="plaque">
+          <div class="eyebrow"><span class="dot"></span> Você está assistindo</div>
+
+          <div class="logo">
+            <div class="logo__top">Depois do</div>
+            <div class="logo__teamo">te amo</div>
+            <div class="dots">
+              <span class="d d1"></span>
+              <span class="d d2"></span>
+              <span class="heart">❤️‍🔥</span>
+            </div>
+          </div>
+
+          <p class="tagline">Conversas de verdade sobre o que vem<br><b>depois</b> do “te amo”.</p>
+
+          <div class="divisor"></div>
+
+          <div class="ep">Episódio 03 · <b>Celso</b></div>
+          <div class="ep-titulo">“Trocou um lanche<br>por uma nova vida”</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    var stage = document.getElementById('stage');
+    function fit(){ stage.style.setProperty('--s', Math.min(innerWidth/1920, innerHeight/1080)); }
+    addEventListener('resize', fit); fit();
+  </script>
+</body>
+</html>
