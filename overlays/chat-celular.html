@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0d0b09">
+<title>Chat da Live — celular</title>
+
+<!--
+  Container pra ABRIR NO CELULAR e acompanhar os comentários da live.
+  Embute o widget de chat do Botrix (tema transparente) num fundo escuro,
+  em tela cheia, respeitando o entalhe/notch do aparelho.
+
+  Pra trocar o chat: mude a URL dentro do iframe (const CHAT_URL abaixo).
+  Dica: adicione esta página à tela inicial do celular ("Adicionar à tela de
+  início") pra abrir como se fosse um app, sem a barra do navegador.
+-->
+
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    height: 100%;
+    background: #0d0b09;              /* fundo escuro: o chat é transparente */
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #wrap {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    /* respeita entalhe/barra de status do celular */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    background:
+      radial-gradient(120% 60% at 50% 0%, rgba(255,138,46,.10), transparent 60%),
+      #0d0b09;
+  }
+  header {
+    flex: 0 0 auto;
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px;
+    color: #ffd23a; font-weight: 700; font-size: 14px;
+    letter-spacing: .06em; text-transform: uppercase;
+    border-bottom: 1px solid rgba(255,138,46,.18);
+  }
+  header .dot {
+    width: 9px; height: 9px; border-radius: 50%; background: #e8420e;
+    box-shadow: 0 0 0 0 rgba(232,66,14,.6);
+    animation: ring 2s ease-out infinite;
+  }
+  @keyframes ring {
+    0%   { box-shadow: 0 0 0 0 rgba(232,66,14,.6); }
+    100% { box-shadow: 0 0 0 9px rgba(232,66,14,0); }
+  }
+  header .spacer { flex: 1; }
+  header button {
+    background: rgba(255,255,255,.08); color: #cabfb0;
+    border: 1px solid rgba(255,255,255,.12); border-radius: 8px;
+    font-size: 12px; font-weight: 600; padding: 6px 10px;
+    letter-spacing: .04em; cursor: pointer;
+  }
+  header button:active { background: rgba(255,255,255,.16); }
+  #frameBox { flex: 1 1 auto; position: relative; }
+  iframe {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    border: 0; background: transparent;
+  }
+</style>
+</head>
+<body>
+  <div id="wrap">
+    <header>
+      <span class="dot"></span>
+      <span>Chat ao vivo</span>
+      <span class="spacer"></span>
+      <button id="reload">Recarregar</button>
+    </header>
+    <div id="frameBox">
+      <iframe id="chat" allow="autoplay" referrerpolicy="no-referrer"></iframe>
+    </div>
+  </div>
+
+  <script>
+    // URL do seu widget de chat do Botrix
+    const CHAT_URL = "https://botrix.live/widgets/chat/?bid=nAk3QwId7JLqcNfOeaLYkA&theme=transparent&messageSound=0&messageDirection=up&platformIcon=false&bots=true&emojis=true&hideCommands=false&hideMessages=false&hideMessagesSeconds=15&widgetSize=21&streamTogether=true&cheer=true&pointsReward=true&animation=popIn&showTimestamp=false&shadowThickness=5&twitch=true&youtube=true&kick=true&trovo=false";
+    const frame = document.getElementById('chat');
+    frame.src = CHAT_URL;
+    document.getElementById('reload').addEventListener('click', function () {
+      frame.src = CHAT_URL;
+    });
+  </script>
+</body>
+</html>
