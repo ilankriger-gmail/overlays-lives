@@ -7,90 +7,253 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0d0b09">
-<title>Chat da Live — celular</title>
+<title>Chat + Roteiro — Depois do Te Amo</title>
 
 <!--
-  Container pra ABRIR NO CELULAR e acompanhar os comentários da live.
-  Embute o widget de chat do Botrix (tema transparente) num fundo escuro,
-  em tela cheia, respeitando o entalhe/notch do aparelho.
+  Container pra ABRIR NO CELULAR e acompanhar CHAT + ROTEIRO ao mesmo tempo.
 
-  Pra trocar o chat: mude a URL dentro do iframe (const CHAT_URL abaixo).
-  Dica: adicione esta página à tela inicial do celular ("Adicionar à tela de
-  início") pra abrir como se fosse um app, sem a barra do navegador.
+  - O chat é o seu widget do Botrix (junta Twitch/YouTube/Kick), embutido como está.
+  - O roteiro é editável logo abaixo (const ROTEIRO): blocos com itens que você
+    marca tocando. O que você marca fica salvo no aparelho (localStorage).
+  - 3 modos no topo: Dividido / Só roteiro / Só chat.
+
+  PRA TROCAR O ROTEIRO: edite o array ROTEIRO lá embaixo no <script>.
+  PRA TROCAR O CHAT: edite a const CHAT_URL.
+
+  Dica: no celular use "Adicionar à tela de início" pra abrir como app.
 -->
 
 <style>
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
-    margin: 0; padding: 0;
-    height: 100%;
-    background: #0d0b09;              /* fundo escuro: o chat é transparente */
+    margin: 0; padding: 0; height: 100%;
+    background: #0d0b09;
     overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    -webkit-tap-highlight-color: transparent;
+    color: #f3ede4;
   }
-  #wrap {
+  :root {
+    --amarelo: #ffd23a;
+    --laranja: #ff8a2e;
+    --vermelho: #e8420e;
+    --cinza: #cabfb0;
+  }
+
+  #app {
     position: fixed; inset: 0;
     display: flex; flex-direction: column;
-    /* respeita entalhe/barra de status do celular */
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-    background:
-      radial-gradient(120% 60% at 50% 0%, rgba(255,138,46,.10), transparent 60%),
-      #0d0b09;
   }
-  header {
+
+  /* barra de topo com os 3 modos */
+  .topbar {
     flex: 0 0 auto;
-    display: flex; align-items: center; gap: 8px;
-    padding: 10px 14px;
-    color: #ffd23a; font-weight: 700; font-size: 14px;
-    letter-spacing: .06em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 10px;
+    background: linear-gradient(180deg, rgba(255,138,46,.10), transparent);
     border-bottom: 1px solid rgba(255,138,46,.18);
   }
-  header .dot {
-    width: 9px; height: 9px; border-radius: 50%; background: #e8420e;
-    box-shadow: 0 0 0 0 rgba(232,66,14,.6);
-    animation: ring 2s ease-out infinite;
+  .brand {
+    display: flex; align-items: center; gap: 6px; min-width: 0;
+    font-family: 'Luckiest Guy', system-ui, sans-serif;
+    color: var(--amarelo); font-weight: 700; font-size: 12px;
+    letter-spacing: 0; text-transform: uppercase; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
   }
-  @keyframes ring {
-    0%   { box-shadow: 0 0 0 0 rgba(232,66,14,.6); }
-    100% { box-shadow: 0 0 0 9px rgba(232,66,14,0); }
+  .brand .label { overflow: hidden; text-overflow: ellipsis; }
+  .brand .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--vermelho);
+    box-shadow: 0 0 0 0 rgba(232,66,14,.6); animation: ring 2s ease-out infinite;
   }
-  header .spacer { flex: 1; }
-  header button {
-    background: rgba(255,255,255,.08); color: #cabfb0;
-    border: 1px solid rgba(255,255,255,.12); border-radius: 8px;
-    font-size: 12px; font-weight: 600; padding: 6px 10px;
-    letter-spacing: .04em; cursor: pointer;
+  @keyframes ring { 0%{box-shadow:0 0 0 0 rgba(232,66,14,.6)} 100%{box-shadow:0 0 0 8px rgba(232,66,14,0)} }
+  .modes { margin-left: auto; flex: 0 0 auto; display: flex; gap: 3px; background: rgba(255,255,255,.06); padding: 3px; border-radius: 10px; }
+  .modes button {
+    appearance: none; border: 0; background: transparent; color: var(--cinza);
+    font-size: 11px; font-weight: 700; padding: 7px 9px; border-radius: 8px; cursor: pointer;
+    letter-spacing: 0; white-space: nowrap;
   }
-  header button:active { background: rgba(255,255,255,.16); }
-  #frameBox { flex: 1 1 auto; position: relative; }
-  iframe {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
-    border: 0; background: transparent;
+  .modes button.active { background: var(--laranja); color: #17130f; }
+
+  /* área principal: empilha roteiro em cima, chat embaixo */
+  .content { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+
+  /* painel do roteiro */
+  #roteiro {
+    flex: 1 1 45%; min-height: 0; overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px 12px 20px;
+    background:
+      radial-gradient(120% 40% at 50% 0%, rgba(255,138,46,.06), transparent 70%),
+      #100d0a;
+  }
+  .bloco { margin-bottom: 16px; }
+  .bloco h2 {
+    margin: 0 0 8px; font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--amarelo);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .bloco h2::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,138,46,.4), transparent); }
+  .item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 11px 12px; margin-bottom: 7px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 12px;
+    font-size: 15px; line-height: 1.35;
+    cursor: pointer; transition: background .15s, opacity .15s;
+  }
+  .item:active { background: rgba(255,255,255,.09); }
+  .item .box {
+    flex: 0 0 auto; width: 22px; height: 22px; margin-top: 1px;
+    border-radius: 6px; border: 2px solid rgba(255,210,58,.55);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: #17130f; font-weight: 900;
+  }
+  .item.done { opacity: .45; }
+  .item.done .box { background: var(--amarelo); border-color: var(--amarelo); }
+  .item.done .box::after { content: "✓"; }
+  .item.done .txt { text-decoration: line-through; }
+  .item.pergunta .txt::before { content: "❓ "; }
+
+  /* divisória arrastável visual entre roteiro e chat */
+  .divider {
+    flex: 0 0 auto; height: 10px;
+    display: flex; align-items: center; justify-content: center;
+    background: #0d0b09; border-top: 1px solid rgba(255,138,46,.18); border-bottom: 1px solid rgba(0,0,0,.4);
+  }
+  .divider::before { content: ""; width: 48px; height: 4px; border-radius: 3px; background: rgba(255,255,255,.18); }
+
+  /* painel do chat */
+  #chatBox { flex: 1 1 55%; min-height: 0; position: relative; background: #0d0b09; }
+  #chatBox iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; }
+  .chatlabel {
+    position: absolute; top: 6px; left: 10px; z-index: 2;
+    font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--cinza);
+    opacity: .7; pointer-events: none;
+  }
+
+  /* modos: escondem/mostram painéis */
+  #app[data-mode="roteiro"] .divider,
+  #app[data-mode="roteiro"] #chatBox { display: none; }
+  #app[data-mode="roteiro"] #roteiro { flex-basis: 100%; }
+  #app[data-mode="chat"] .divider,
+  #app[data-mode="chat"] #roteiro { display: none; }
+  #app[data-mode="chat"] #chatBox { flex-basis: 100%; }
+
+  .reset {
+    display: block; width: 100%; margin-top: 6px;
+    background: transparent; color: rgba(202,191,176,.6);
+    border: 1px dashed rgba(255,255,255,.12); border-radius: 10px;
+    font-size: 12px; padding: 9px; cursor: pointer;
   }
 </style>
 </head>
 <body>
-  <div id="wrap">
-    <header>
-      <span class="dot"></span>
-      <span>Chat ao vivo</span>
-      <span class="spacer"></span>
-      <button id="reload">Recarregar</button>
-    </header>
-    <div id="frameBox">
-      <iframe id="chat" allow="autoplay" referrerpolicy="no-referrer"></iframe>
+  <div id="app" data-mode="split">
+    <div class="topbar">
+      <div class="brand"><span class="dot"></span> <span class="label">Ao vivo</span></div>
+      <div class="modes">
+        <button data-mode="split" class="active">Dividido</button>
+        <button data-mode="roteiro">Roteiro</button>
+        <button data-mode="chat">Chat</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div id="roteiro"></div>
+      <div class="divider"></div>
+      <div id="chatBox">
+        <span class="chatlabel">Chat ao vivo</span>
+        <iframe id="chat" allow="autoplay" referrerpolicy="no-referrer"></iframe>
+      </div>
     </div>
   </div>
 
   <script>
-    // URL do seu widget de chat do Botrix
+    // ================== CHAT ==================
     const CHAT_URL = "https://botrix.live/widgets/chat/?bid=nAk3QwId7JLqcNfOeaLYkA&theme=transparent&messageSound=0&messageDirection=up&platformIcon=false&bots=true&emojis=true&hideCommands=false&hideMessages=false&hideMessagesSeconds=15&widgetSize=21&streamTogether=true&cheer=true&pointsReward=true&animation=popIn&showTimestamp=false&shadowThickness=5&twitch=true&youtube=true&kick=true&trovo=false";
-    const frame = document.getElementById('chat');
-    frame.src = CHAT_URL;
-    document.getElementById('reload').addEventListener('click', function () {
-      frame.src = CHAT_URL;
+    document.getElementById('chat').src = CHAT_URL;
+
+    // ================== ROTEIRO (EDITE AQUI) ==================
+    // Cada bloco tem um título e uma lista de itens.
+    // Coloque "?" no começo de um item pra marcá-lo como PERGUNTA (ganha o ❓).
+    const ROTEIRO = [
+      { bloco: "Abertura", itens: [
+        "Boas-vindas e apresentar o programa (Depois do Te Amo)",
+        "Apresentar o convidado: meu pai — brasileiro mais velho a subir o Everest",
+        "Lembrar a galera: mandem perguntas no chat!",
+      ]},
+      { bloco: "A história", itens: [
+        "Como surgiu a ideia de escalar o Everest?",
+        "Como foi contar pra família? Qual foi a reação?",
+        "Quanto tempo de preparação e treino?",
+      ]},
+      { bloco: "A escalada", itens: [
+        "O dia da subida ao cume — como foi?",
+        "?Qual foi o momento de mais medo lá em cima?",
+        "O que passou na cabeça no topo do mundo?",
+      ]},
+      { bloco: "Depois do Te Amo", itens: [
+        "O que mudou na relação de vocês depois disso?",
+        "Uma mensagem pra quem acha que é 'tarde demais'",
+      ]},
+      { bloco: "Perguntas do chat", itens: [
+        "?Abrir pras perguntas da galera (ler do chat ao lado)",
+      ]},
+      { bloco: "Encerramento", itens: [
+        "Agradecer o convidado e a audiência",
+        "Chamar pro próximo episódio / redes sociais",
+      ]},
+    ];
+
+    // ================== render + estado ==================
+    const KEY = "ddta-roteiro-v1";
+    let done = {};
+    try { done = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { done = {}; }
+    function save() { try { localStorage.setItem(KEY, JSON.stringify(done)); } catch (e) {} }
+
+    const root = document.getElementById('roteiro');
+    function render() {
+      root.innerHTML = "";
+      ROTEIRO.forEach(function (b, bi) {
+        const sec = document.createElement('div');
+        sec.className = 'bloco';
+        const h = document.createElement('h2');
+        h.textContent = b.bloco;
+        sec.appendChild(h);
+        b.itens.forEach(function (raw, ii) {
+          const isQ = raw.charAt(0) === '?';
+          const txt = isQ ? raw.slice(1).trim() : raw;
+          const id = bi + '-' + ii;
+          const el = document.createElement('div');
+          el.className = 'item' + (isQ ? ' pergunta' : '') + (done[id] ? ' done' : '');
+          el.innerHTML = '<span class="box"></span><span class="txt"></span>';
+          el.querySelector('.txt').textContent = txt;
+          el.addEventListener('click', function () {
+            done[id] = !done[id];
+            el.classList.toggle('done', !!done[id]);
+            save();
+          });
+          sec.appendChild(el);
+        });
+        root.appendChild(sec);
+      });
+      const btn = document.createElement('button');
+      btn.className = 'reset';
+      btn.textContent = 'Desmarcar tudo';
+      btn.addEventListener('click', function () { done = {}; save(); render(); });
+      root.appendChild(btn);
+    }
+    render();
+
+    // ================== modos ==================
+    const app = document.getElementById('app');
+    document.querySelectorAll('.modes button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        document.querySelectorAll('.modes button').forEach(function (x) { x.classList.remove('active'); });
+        b.classList.add('active');
+        app.setAttribute('data-mode', b.getAttribute('data-mode'));
+      });
     });
   </script>
 </body>
