@@ -41,6 +41,7 @@
 
   #app {
     position: fixed; inset: 0;
+    --split: 45%;                     /* quanto do espaço vai pro roteiro (arrastável) */
     display: flex; flex-direction: column;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
@@ -79,7 +80,7 @@
 
   /* painel do roteiro */
   #roteiro {
-    flex: 1 1 45%; min-height: 0; overflow-y: auto;
+    flex: 0 0 var(--split, 45%); min-height: 0; overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding: 12px 12px 20px;
     background:
@@ -114,17 +115,28 @@
   .item.done .box::after { content: "✓"; }
   .item.done .txt { text-decoration: line-through; }
   .item.pergunta .txt::before { content: "❓ "; }
+  /* linha de nota (regra de pontos, ranking, etc.) — sem caixa de marcar */
+  .note {
+    padding: 4px 12px 8px 44px; margin: -3px 0 7px;
+    font-size: 13px; line-height: 1.35; color: var(--cinza);
+  }
+  .note.forte { color: var(--amarelo); font-weight: 700; }
 
-  /* divisória arrastável visual entre roteiro e chat */
+  /* divisória ARRASTÁVEL entre roteiro e chat (puxe pra cima/baixo) */
   .divider {
-    flex: 0 0 auto; height: 10px;
+    flex: 0 0 auto; height: 22px;
     display: flex; align-items: center; justify-content: center;
     background: #0d0b09; border-top: 1px solid rgba(255,138,46,.18); border-bottom: 1px solid rgba(0,0,0,.4);
+    cursor: row-resize; touch-action: none; user-select: none; -webkit-user-select: none;
   }
-  .divider::before { content: ""; width: 48px; height: 4px; border-radius: 3px; background: rgba(255,255,255,.18); }
+  .divider::before {
+    content: ""; width: 60px; height: 5px; border-radius: 3px;
+    background: rgba(255,210,58,.45);
+  }
+  .divider.dragging::before { background: var(--laranja); }
 
   /* painel do chat */
-  #chatBox { flex: 1 1 55%; min-height: 0; position: relative; background: #0d0b09; }
+  #chatBox { flex: 1 1 auto; min-height: 0; position: relative; background: #0d0b09; }
   #chatBox iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; }
   .chatlabel {
     position: absolute; top: 6px; left: 10px; z-index: 2;
@@ -139,6 +151,8 @@
   #app[data-mode="chat"] .divider,
   #app[data-mode="chat"] #roteiro { display: none; }
   #app[data-mode="chat"] #chatBox { flex-basis: 100%; }
+  /* durante o arraste, o iframe do chat não “rouba” o toque */
+  #app.resizing #chatBox iframe { pointer-events: none; }
 
   .reset {
     display: block; width: 100%; margin-top: 6px;
@@ -178,31 +192,71 @@
     // Cada bloco tem um título e uma lista de itens.
     // Coloque "?" no começo de um item pra marcá-lo como PERGUNTA (ganha o ❓).
     const ROTEIRO = [
-      { bloco: "Abertura", itens: [
-        "Boas-vindas e apresentar o programa (Depois do Te Amo)",
-        "Apresentar o convidado: meu pai — brasileiro mais velho a subir o Everest",
-        "Lembrar a galera: mandem perguntas no chat!",
+      { bloco: "Depois do Te Amo: com meu Pai (Joel Kriger)", itens: [
+        "#!Subiu o Everest depois dos 68",
       ]},
-      { bloco: "A história", itens: [
-        "Como surgiu a ideia de escalar o Everest?",
-        "Como foi contar pra família? Qual foi a reação?",
-        "Quanto tempo de preparação e treino?",
+      { bloco: "Aquece (quem é ele)", itens: [
+        "1. Pai, se apresenta pra quem tá chegando agora: quem é o Joel Kriger?",
+        "2. Antes de tudo isso — Everest, Canal da Mancha — você sempre foi esse cara de desafio? Como era o Joel mais novo?",
       ]},
-      { bloco: "A escalada", itens: [
-        "O dia da subida ao cume — como foi?",
-        "?Qual foi o momento de mais medo lá em cima?",
-        "O que passou na cabeça no topo do mundo?",
+      { bloco: "O sonho", itens: [
+        "Qual foi o maior desafios que você já realizou?",
+        "3. Depois de já ter escalado o Everest, o que te fez olhar pro mar e pensar \"quero atravessar o Canal da Mancha\"?",
+        "4. O que essa travessia significa pra você? Por que ela?",
+        "5. Muita gente comenta \"na idade dele isso é loucura\". O que você responde pra essa gente?",
       ]},
-      { bloco: "Depois do Te Amo", itens: [
-        "O que mudou na relação de vocês depois disso?",
-        "Uma mensagem pra quem acha que é 'tarde demais'",
+      { bloco: "A preparação", itens: [
+        "6. Como foi treinar pra isso? Quanto tempo, e como se prepara o corpo — e a cabeça — pra 3,5km em água gelada?",
+        "7. Alguém tentou te convencer a não fazer? Como é lidar com o medo de quem te ama?",
       ]},
-      { bloco: "Perguntas do chat", itens: [
-        "?Abrir pras perguntas da galera (ler do chat ao lado)",
+      { bloco: "A logística — as perguntas que a internet mais fez", itens: [
+        "8. [🔥 audiência] Por que a travessia é de noite? Por que não de dia, pra pegar menos frio?",
+        "9. [🔥 audiência] Qual era a temperatura da água? Como o corpo aguenta aquilo?",
+        "10. [🔥 audiência] E aquela substância branca no seu corpo — o que é e pra que serve?",
       ]},
-      { bloco: "Encerramento", itens: [
-        "Agradecer o convidado e a audiência",
-        "Chamar pro próximo episódio / redes sociais",
+      { bloco: "Dentro da água", itens: [
+        "11. Conta o instante de entrar na água, no escuro. Qual foi o primeiro pensamento?",
+        "12. Nadando sozinho, no meio do mar, de madrugada — o que passa na cabeça de um homem ali?",
+        "13. O que foi mais difícil: o frio, a distância ou a mente?",
+        "14. [🔥 audiência] Chegou a tontura. Conta o que você sentiu quando entendeu que ia ter que parar.",
+        "15. Teve um segundo em que você pensou em desistir? O que te segurou até os 3,5km?",
+      ]},
+      { bloco: "A emoção pai e filho", itens: [
+        "16. Eu tava ali te filmando, te chamando de \"papai\". O que foi ter seu filho do teu lado nessa hora?",
+        "17. O que a gente aprendeu um com o outro nessa travessia?",
+      ]},
+      { bloco: "Depois / a próxima", itens: [
+        "18. Você parou nos 3,5km e a internet inteira te chamou de campeão. Como é ser vencedor mesmo sem \"completar\"?",
+        "19. Por que a próxima só em 2029? O que vai ser diferente — e o que te dá certeza de que dessa vez vai?",
+      ]},
+      { bloco: "O fecho (a mensagem)", itens: [
+        "20. Pra fechar: que recado o Joel deixa pra quem acha que já passou da idade de sonhar? E depois do Everest e do Canal… qual sonho ainda falta?",
+      ]},
+      { bloco: "Ranking", itens: [
+        "#!Fran: 4700",
+        "#!Celso: 9100",
+      ]},
+      { bloco: "Desafios dos 60 pontos", itens: [
+        "1. Ligar para alguém importante e agradecer",
+        "#Valendo 20 pontos:",
+        "#0 pontos: não conseguir",
+        "#20 pontos: ligar e agradecer",
+        "2. Fazer alguém sorrir em até 1 minuto",
+        "#Valendo 20 pontos:",
+        "#0 pontos: não conseguir",
+        "#5 pontos: fazer cócegas",
+        "#20 pontos: só falando ou fazendo algo em 1 minuto",
+        "3. Ligar para alguém e tentar ouvir \"eu te amo\"",
+        "#Valendo 20 pontos:",
+        "#-10 pontos: Não conseguir ouvir um te amo",
+        "#5 pontos: Pedir",
+        "#10 pontos: Falar primeiro",
+        "#20 pontos: Não pedir",
+        "4. Multiplicador",
+        "#Multiplicar os pontos pelos segundos que ficou na prancha baixa.",
+      ]},
+      { bloco: "Parabéns!!", itens: [
+        "#!🎉 Parabéns!!",
       ]},
     ];
 
@@ -222,6 +276,15 @@
         h.textContent = b.bloco;
         sec.appendChild(h);
         b.itens.forEach(function (raw, ii) {
+          // linha começando com "#" = nota (sem caixa). "#!" = nota em destaque.
+          if (raw.charAt(0) === '#') {
+            const forte = raw.charAt(1) === '!';
+            const n = document.createElement('div');
+            n.className = 'note' + (forte ? ' forte' : '');
+            n.textContent = (forte ? raw.slice(2) : raw.slice(1)).trim();
+            sec.appendChild(n);
+            return;
+          }
           const isQ = raw.charAt(0) === '?';
           const txt = isQ ? raw.slice(1).trim() : raw;
           const id = bi + '-' + ii;
@@ -246,8 +309,40 @@
     }
     render();
 
-    // ================== modos ==================
+    // ================== divisória arrastável ==================
     const app = document.getElementById('app');
+    const divider = document.querySelector('.divider');
+    const content = document.querySelector('.content');
+    const SPLITKEY = "ddta-split-v1";
+    const savedSplit = localStorage.getItem(SPLITKEY);
+    if (savedSplit) app.style.setProperty('--split', savedSplit);
+
+    let dragging = false;
+    function applyY(clientY) {
+      const r = content.getBoundingClientRect();
+      let frac = (clientY - r.top) / r.height * 100;
+      frac = Math.max(15, Math.min(85, frac));   // não deixa nenhum lado sumir
+      app.style.setProperty('--split', frac.toFixed(1) + '%');
+    }
+    divider.addEventListener('pointerdown', function (e) {
+      dragging = true;
+      divider.classList.add('dragging');
+      app.classList.add('resizing');
+      try { divider.setPointerCapture(e.pointerId); } catch (err) {}
+      e.preventDefault();
+    });
+    divider.addEventListener('pointermove', function (e) { if (dragging) applyY(e.clientY); });
+    function endDrag() {
+      if (!dragging) return;
+      dragging = false;
+      divider.classList.remove('dragging');
+      app.classList.remove('resizing');
+      try { localStorage.setItem(SPLITKEY, app.style.getPropertyValue('--split')); } catch (err) {}
+    }
+    divider.addEventListener('pointerup', endDrag);
+    divider.addEventListener('pointercancel', endDrag);
+
+    // ================== modos ==================
     document.querySelectorAll('.modes button').forEach(function (b) {
       b.addEventListener('click', function () {
         document.querySelectorAll('.modes button').forEach(function (x) { x.classList.remove('active'); });
