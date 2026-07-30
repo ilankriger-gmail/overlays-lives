@@ -135,14 +135,32 @@
   }
   .divider.dragging::before { background: var(--laranja); }
 
-  /* painel do chat */
-  #chatBox { flex: 1 1 auto; min-height: 0; position: relative; background: #0d0b09; }
-  #chatBox iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; }
+  /* painel do chat (mini-vídeo em cima + chat embaixo) */
+  #chatBox { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; background: #0d0b09; }
+  /* mini-preview da live (só no modo Dividido) */
+  #miniLive {
+    flex: 0 0 auto; position: relative; width: 100%; aspect-ratio: 16 / 9;
+    background: #000; border-bottom: 1px solid rgba(255,138,46,.25); display: none;
+  }
+  #miniLive iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .livebadge {
+    position: absolute; top: 6px; left: 8px; z-index: 3;
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(0,0,0,.6); color: #fff; font-size: 10px; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase; padding: 3px 7px; border-radius: 6px;
+    pointer-events: none;
+  }
+  .livebadge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--vermelho); }
+  #chatInner { flex: 1 1 auto; position: relative; min-height: 0; }
+  #chatInner iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; }
   .chatlabel {
     position: absolute; top: 6px; left: 10px; z-index: 2;
     font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--cinza);
     opacity: .7; pointer-events: none;
   }
+  /* aba Live: vídeo em tela cheia */
+  #liveBox { flex: 1 1 auto; min-height: 0; position: relative; background: #000; display: none; }
+  #liveBox iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 
   /* modos: escondem/mostram painéis */
   #app[data-mode="roteiro"] .divider,
@@ -151,8 +169,16 @@
   #app[data-mode="chat"] .divider,
   #app[data-mode="chat"] #roteiro { display: none; }
   #app[data-mode="chat"] #chatBox { flex-basis: 100%; }
-  /* durante o arraste, o iframe do chat não “rouba” o toque */
-  #app.resizing #chatBox iframe { pointer-events: none; }
+  /* mini-preview aparece só no modo Dividido */
+  #app[data-mode="split"] #miniLive { display: block; }
+  /* modo Live: só o vídeo cheio */
+  #app[data-mode="live"] #roteiro,
+  #app[data-mode="live"] .divider,
+  #app[data-mode="live"] #chatBox { display: none; }
+  #app[data-mode="live"] #liveBox { display: block; }
+  /* durante o arraste, os iframes não “roubam” o toque */
+  #app.resizing #chatInner iframe,
+  #app.resizing #miniLive iframe { pointer-events: none; }
 
   .reset {
     display: block; width: 100%; margin-top: 6px;
@@ -170,6 +196,7 @@
         <button data-mode="split" class="active">Dividido</button>
         <button data-mode="roteiro">Roteiro</button>
         <button data-mode="chat">Chat</button>
+        <button data-mode="live">Live</button>
       </div>
     </div>
 
@@ -177,8 +204,17 @@
       <div id="roteiro"></div>
       <div class="divider"></div>
       <div id="chatBox">
-        <span class="chatlabel">Chat ao vivo</span>
-        <iframe id="chat" allow="autoplay" referrerpolicy="no-referrer"></iframe>
+        <div id="miniLive">
+          <span class="livebadge"><span class="dot"></span> Live</span>
+          <iframe id="liveMini" allow="autoplay; fullscreen" allowfullscreen></iframe>
+        </div>
+        <div id="chatInner">
+          <span class="chatlabel">Chat ao vivo</span>
+          <iframe id="chat" allow="autoplay" referrerpolicy="no-referrer"></iframe>
+        </div>
+      </div>
+      <div id="liveBox">
+        <iframe id="liveFull" allow="autoplay; fullscreen" allowfullscreen></iframe>
       </div>
     </div>
   </div>
@@ -342,14 +378,40 @@
     divider.addEventListener('pointerup', endDrag);
     divider.addEventListener('pointercancel', endDrag);
 
+    // ================== preview da LIVE (Twitch) ==================
+    const TWITCH_CHANNEL = "nextleveldj";
+    const LIVE_PARENTS = ["ilankriger-gmail.github.io", "localhost", "127.0.0.1"];
+    function liveUrl() {
+      const parents = LIVE_PARENTS.map(function (h) { return "parent=" + h; }).join("&");
+      return "https://player.twitch.tv/?channel=" + TWITCH_CHANNEL +
+             "&" + parents + "&muted=true&autoplay=true";
+    }
+    const liveMini = document.getElementById('liveMini');
+    const liveFull = document.getElementById('liveFull');
+    // carrega o vídeo só no painel visível (evita 2 players tocando juntos)
+    function updateLive(mode) {
+      if (mode === 'live') {
+        if (!liveFull.src) liveFull.src = liveUrl();
+        liveMini.src = "";
+      } else if (mode === 'split') {
+        if (!liveMini.src) liveMini.src = liveUrl();
+        liveFull.src = "";
+      } else { // roteiro ou chat: sem vídeo
+        liveMini.src = ""; liveFull.src = "";
+      }
+    }
+
     // ================== modos ==================
     document.querySelectorAll('.modes button').forEach(function (b) {
       b.addEventListener('click', function () {
         document.querySelectorAll('.modes button').forEach(function (x) { x.classList.remove('active'); });
         b.classList.add('active');
-        app.setAttribute('data-mode', b.getAttribute('data-mode'));
+        const mode = b.getAttribute('data-mode');
+        app.setAttribute('data-mode', mode);
+        updateLive(mode);
       });
     });
+    updateLive(app.getAttribute('data-mode'));  // estado inicial (Dividido → mini)
   </script>
 </body>
 </html>
