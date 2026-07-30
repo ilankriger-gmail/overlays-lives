@@ -226,7 +226,6 @@
     box-shadow: 0 12px 34px rgba(0,0,0,.6), 0 0 0 1px rgba(255,138,46,.5);
     display: none; touch-action: none;
   }
-  #floatLive.on { display: block; }
   .float-bar {
     display: flex; align-items: center; justify-content: space-between; gap: 6px;
     padding: 5px 6px 5px 8px; background: #17130f; cursor: grab; touch-action: none;
@@ -235,12 +234,6 @@
   .float-close { appearance: none; border: 0; background: rgba(255,255,255,.12); color: #fff; font-size: 12px;
     width: 22px; height: 22px; border-radius: 6px; cursor: pointer; line-height: 1; }
   #floatLive iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; }
-  #floatBtn {
-    position: fixed; z-index: 49; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom));
-    appearance: none; border: 0; border-radius: 999px; padding: 11px 16px; font-size: 13px; font-weight: 700;
-    background: var(--laranja); color: #17130f; cursor: pointer; box-shadow: 0 8px 22px rgba(0,0,0,.45);
-  }
-  #floatBtn.on { background: var(--vermelho); color: #fff; }
 
   /* modos: escondem/mostram painéis */
   #app[data-mode="roteiro"] .divider,
@@ -249,8 +242,10 @@
   #app[data-mode="chat"] .divider,
   #app[data-mode="chat"] #roteiro { display: none; }
   #app[data-mode="chat"] #chatBox { flex-basis: 100%; }
-  /* mini-preview aparece só no modo Dividido */
-  #app[data-mode="split"] #miniLive { display: block; }
+  /* mini-preview embutido aparece só na view "+ Preview" */
+  #app[data-mode="splitprev"] #miniLive { display: block; }
+  /* preview flutuante aparece só na view "+ Flutuante" */
+  #app[data-mode="splitfloat"] #floatLive { display: block; }
   /* modo Live: só o vídeo cheio */
   #app[data-mode="live"] #roteiro,
   #app[data-mode="live"] .divider,
@@ -261,8 +256,6 @@
   #app[data-mode="pontos"] .divider,
   #app[data-mode="pontos"] #chatBox { display: none; }
   #app[data-mode="pontos"] #pontosBox { display: block; }
-  /* botão flutuante some no modo Live (o vídeo já tá cheio) */
-  #app[data-mode="live"] #floatBtn { display: none; }
   /* durante o arraste, os iframes não “roubam” o toque */
   #app.resizing #chatInner iframe,
   #app.resizing #miniLive iframe { pointer-events: none; }
@@ -276,11 +269,13 @@
 </style>
 </head>
 <body>
-  <div id="app" data-mode="split">
+  <div id="app" data-mode="splitprev">
     <div class="topbar">
       <div class="brand"><span class="dot"></span> <span class="label">Ao vivo</span></div>
       <div class="modes">
-        <button data-mode="split" class="active">Dividido</button>
+        <button data-mode="split">Roteiro+Chat</button>
+        <button data-mode="splitprev" class="active">+ Preview</button>
+        <button data-mode="splitfloat">+ Flutuante</button>
         <button data-mode="roteiro">Roteiro</button>
         <button data-mode="chat">Chat</button>
         <button data-mode="live">Live</button>
@@ -378,7 +373,6 @@
       </div>
       <iframe id="liveFloat" allow="autoplay; fullscreen" allowfullscreen></iframe>
     </div>
-    <button id="floatBtn" title="Player flutuante">⧉ Live</button>
   </div>
 
   <script>
@@ -551,43 +545,29 @@
     const liveMini = document.getElementById('liveMini');
     const liveFull = document.getElementById('liveFull');
     const liveFloat = document.getElementById('liveFloat');
-    let floating = false;
 
     // carrega o vídeo só onde está visível (nunca 2 players tocando juntos)
     function refreshVideo() {
       const mode = app.getAttribute('data-mode');
-      if (floating) {
-        if (!liveFloat.src) liveFloat.src = liveUrl();
-        liveMini.src = ""; liveFull.src = "";
-        return;
-      }
-      liveFloat.src = "";
-      if (mode === 'live') {
-        if (!liveFull.src) liveFull.src = liveUrl();
-        liveMini.src = "";
-      } else if (mode === 'split') {
-        if (!liveMini.src) liveMini.src = liveUrl();
-        liveFull.src = "";
-      } else { // roteiro / chat / pontos: sem vídeo embutido
-        liveMini.src = ""; liveFull.src = "";
-      }
+      liveMini.src = ""; liveFull.src = ""; liveFloat.src = "";
+      if (mode === 'live') liveFull.src = liveUrl();
+      else if (mode === 'splitprev') liveMini.src = liveUrl();
+      else if (mode === 'splitfloat') liveFloat.src = liveUrl();
+      // split / roteiro / chat / pontos: sem vídeo
     }
 
-    // ================== modos ==================
+    // ================== modos (views) ==================
     document.querySelectorAll('.modes button').forEach(function (b) {
       b.addEventListener('click', function () {
         document.querySelectorAll('.modes button').forEach(function (x) { x.classList.remove('active'); });
         b.classList.add('active');
-        const mode = b.getAttribute('data-mode');
-        app.setAttribute('data-mode', mode);
-        if (mode === 'live' && floating) setFloating(false);  // Live já mostra o vídeo cheio
+        app.setAttribute('data-mode', b.getAttribute('data-mode'));
         refreshVideo();
       });
     });
 
-    // ================== player flutuante ==================
+    // ================== player flutuante (arrastável) ==================
     const floatBox = document.getElementById('floatLive');
-    const floatBtn = document.getElementById('floatBtn');
     const FLOATKEY = "ddta-floatpos-v1";
     (function () {
       try {
@@ -595,14 +575,14 @@
         if (p) { floatBox.style.left = p.left; floatBox.style.top = p.top; floatBox.style.right = "auto"; }
       } catch (e) {}
     })();
-    function setFloating(on) {
-      floating = on;
-      floatBox.classList.toggle('on', on);
-      floatBtn.classList.toggle('on', on);
+    // o ✕ do flutuante volta pra view "Roteiro+Chat"
+    floatBox.querySelector('.float-close').addEventListener('click', function () {
+      document.querySelectorAll('.modes button').forEach(function (x) {
+        x.classList.toggle('active', x.getAttribute('data-mode') === 'split');
+      });
+      app.setAttribute('data-mode', 'split');
       refreshVideo();
-    }
-    floatBtn.addEventListener('click', function () { setFloating(!floating); });
-    floatBox.querySelector('.float-close').addEventListener('click', function () { setFloating(false); });
+    });
 
     // arrastar o flutuante pela barrinha
     const fbar = floatBox.querySelector('.float-bar');
