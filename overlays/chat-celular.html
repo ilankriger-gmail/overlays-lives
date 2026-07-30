@@ -170,6 +170,9 @@
     color: var(--cinza); font-size: 11px; font-weight: 700; padding: 5px 13px; border-radius: 999px; cursor: pointer;
   }
   .chat-src button.active { background: var(--laranja); color: #17130f; border-color: var(--laranja); }
+  #ttConnect { display: none; margin-left: auto; align-self: center; white-space: nowrap;
+    font-size: 11px; font-weight: 700; color: var(--amarelo); text-decoration: none; padding: 4px 6px; }
+  .chat-src.tiktok #ttConnect { display: inline-flex; align-items: center; }
   .chat-frame { flex: 1 1 auto; position: relative; min-height: 0; }
   .chat-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; }
   /* aba Live: vídeo em tela cheia */
@@ -310,6 +313,7 @@
           <div class="chat-src">
             <button data-src="geral" class="active">Geral</button>
             <button data-src="tiktok">TikTok</button>
+            <a id="ttConnect" href="https://tikfinity.zerody.one/dashboard" target="_blank" rel="noopener">⚙ Conectar TikFinity</a>
           </div>
           <div class="chat-frame">
             <iframe id="chat" allow="autoplay" referrerpolicy="no-referrer"></iframe>
@@ -413,6 +417,7 @@
       document.querySelectorAll('.chat-src button').forEach(function (b) {
         b.classList.toggle('active', b.getAttribute('data-src') === src);
       });
+      document.querySelector('.chat-src').classList.toggle('tiktok', src === 'tiktok');
       if (save) { try { localStorage.setItem(CHATKEY, src); } catch (e) {} }
     }
     let curChat = 'geral';
