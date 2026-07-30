@@ -554,16 +554,27 @@
 
     // reposiciona o player único por cima do slot da view ativa (sem recarregar).
     // Nas views sem vídeo ele só fica escondido (continua carregado por baixo).
+    // manda o player pra fora da tela SEM esconder (display:block) — assim ele
+    // continua rodando/carregado e nunca recarrega ou roda anúncio de novo.
+    function parkPlayer() {
+      player.style.display = 'block';
+      player.style.pointerEvents = 'none';
+      player.style.left = '-100000px';
+      player.style.top = '0px';
+      player.style.width = '320px';
+      player.style.height = '180px';
+    }
     function positionPlayer() {
       const mode = app.getAttribute('data-mode');
       let slot = null;
       if (mode === 'live') slot = fullSlot;
       else if (mode === 'splitprev') slot = miniSlot;
       else if (mode === 'splitfloat') slot = floatSlot;
-      if (!slot) { player.style.display = 'none'; return; }
+      if (!slot) { parkPlayer(); return; }
       const r = slot.getBoundingClientRect();
-      if (r.width < 2 || r.height < 2) { player.style.display = 'none'; return; }
+      if (r.width < 2 || r.height < 2) { parkPlayer(); return; }
       player.style.display = 'block';
+      player.style.pointerEvents = '';
       player.style.left = r.left + 'px';
       player.style.top = r.top + 'px';
       player.style.width = r.width + 'px';
