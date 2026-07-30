@@ -144,9 +144,9 @@
     flex: 0 0 auto; position: relative; width: 100%; aspect-ratio: 16 / 9;
     background: #000; border-bottom: 1px solid rgba(255,138,46,.25); display: none;
   }
-  #miniLive iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  #miniSlot { position: absolute; inset: 0; background: #000; }
   .livebadge {
-    position: absolute; top: 6px; left: 8px; z-index: 3;
+    position: absolute; top: 6px; left: 8px; z-index: 61;
     display: inline-flex; align-items: center; gap: 5px;
     background: rgba(0,0,0,.6); color: #fff; font-size: 10px; font-weight: 700;
     letter-spacing: .08em; text-transform: uppercase; padding: 3px 7px; border-radius: 6px;
@@ -162,7 +162,7 @@
   }
   /* aba Live: vídeo em tela cheia */
   #liveBox { flex: 1 1 auto; min-height: 0; position: relative; background: #000; display: none; }
-  #liveBox iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  #fullSlot { position: absolute; inset: 0; background: #000; }
 
   /* ===== PLACAR / RANKING ===== */
   #pontosBox { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; display: none; background: #100d0a; }
@@ -233,7 +233,9 @@
   .float-bar:active { cursor: grabbing; }
   .float-close { appearance: none; border: 0; background: rgba(255,255,255,.12); color: #fff; font-size: 12px;
     width: 22px; height: 22px; border-radius: 6px; cursor: pointer; line-height: 1; }
-  #floatLive iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; }
+  #floatSlot { display: block; width: 100%; aspect-ratio: 16 / 9; background: #000; }
+  /* player único, reposicionado por JS sobre o slot ativo */
+  #livePlayer { position: fixed; z-index: 60; border: 0; background: #000; display: none; }
 
   /* modos: escondem/mostram painéis */
   #app[data-mode="roteiro"] .divider,
@@ -258,7 +260,7 @@
   #app[data-mode="pontos"] #pontosBox { display: block; }
   /* durante o arraste, os iframes não “roubam” o toque */
   #app.resizing #chatInner iframe,
-  #app.resizing #miniLive iframe { pointer-events: none; }
+  #app.resizing #livePlayer { pointer-events: none; }
 
   .reset {
     display: block; width: 100%; margin-top: 6px;
@@ -289,16 +291,14 @@
       <div id="chatBox">
         <div id="miniLive">
           <span class="livebadge"><span class="dot"></span> Live</span>
-          <iframe id="liveMini" allow="autoplay; fullscreen" allowfullscreen></iframe>
+          <div id="miniSlot" class="slot"></div>
         </div>
         <div id="chatInner">
           <span class="chatlabel">Chat ao vivo</span>
           <iframe id="chat" allow="autoplay" referrerpolicy="no-referrer"></iframe>
         </div>
       </div>
-      <div id="liveBox">
-        <iframe id="liveFull" allow="autoplay; fullscreen" allowfullscreen></iframe>
-      </div>
+      <div id="liveBox"><div id="fullSlot" class="slot"></div></div>
 
       <!-- PLACAR / RANKING -->
       <div id="pontosBox">
@@ -371,8 +371,12 @@
         <span class="livebadge"><span class="dot"></span> Live</span>
         <button class="float-close" title="Fechar">✕</button>
       </div>
-      <iframe id="liveFloat" allow="autoplay; fullscreen" allowfullscreen></iframe>
+      <div id="floatSlot" class="slot"></div>
     </div>
+
+    <!-- ÚNICO player da live: fica sempre carregado e é reposicionado sobre o slot
+         da view ativa, então trocar de aba NÃO recarrega (sem play/anúncio de novo) -->
+    <iframe id="livePlayer" allow="autoplay; fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>
   </div>
 
   <script>
@@ -523,7 +527,7 @@
       try { divider.setPointerCapture(e.pointerId); } catch (err) {}
       e.preventDefault();
     });
-    divider.addEventListener('pointermove', function (e) { if (dragging) applyY(e.clientY); });
+    divider.addEventListener('pointermove', function (e) { if (dragging) { applyY(e.clientY); positionPlayer(); } });
     function endDrag() {
       if (!dragging) return;
       dragging = false;
@@ -542,19 +546,32 @@
       return "https://player.twitch.tv/?channel=" + TWITCH_CHANNEL +
              "&" + parents + "&muted=true&autoplay=true";
     }
-    const liveMini = document.getElementById('liveMini');
-    const liveFull = document.getElementById('liveFull');
-    const liveFloat = document.getElementById('liveFloat');
+    const player = document.getElementById('livePlayer');
+    const miniSlot = document.getElementById('miniSlot');
+    const fullSlot = document.getElementById('fullSlot');
+    const floatSlot = document.getElementById('floatSlot');
+    player.src = liveUrl();          // carrega UMA vez e nunca mais recarrega
 
-    // carrega o vídeo só onde está visível (nunca 2 players tocando juntos)
-    function refreshVideo() {
+    // reposiciona o player único por cima do slot da view ativa (sem recarregar).
+    // Nas views sem vídeo ele só fica escondido (continua carregado por baixo).
+    function positionPlayer() {
       const mode = app.getAttribute('data-mode');
-      liveMini.src = ""; liveFull.src = ""; liveFloat.src = "";
-      if (mode === 'live') liveFull.src = liveUrl();
-      else if (mode === 'splitprev') liveMini.src = liveUrl();
-      else if (mode === 'splitfloat') liveFloat.src = liveUrl();
-      // split / roteiro / chat / pontos: sem vídeo
+      let slot = null;
+      if (mode === 'live') slot = fullSlot;
+      else if (mode === 'splitprev') slot = miniSlot;
+      else if (mode === 'splitfloat') slot = floatSlot;
+      if (!slot) { player.style.display = 'none'; return; }
+      const r = slot.getBoundingClientRect();
+      if (r.width < 2 || r.height < 2) { player.style.display = 'none'; return; }
+      player.style.display = 'block';
+      player.style.left = r.left + 'px';
+      player.style.top = r.top + 'px';
+      player.style.width = r.width + 'px';
+      player.style.height = r.height + 'px';
     }
+    addEventListener('resize', positionPlayer);
+    addEventListener('orientationchange', positionPlayer);
+    addEventListener('load', positionPlayer);
 
     // ================== modos (views) ==================
     document.querySelectorAll('.modes button').forEach(function (b) {
@@ -562,7 +579,7 @@
         document.querySelectorAll('.modes button').forEach(function (x) { x.classList.remove('active'); });
         b.classList.add('active');
         app.setAttribute('data-mode', b.getAttribute('data-mode'));
-        refreshVideo();
+        positionPlayer();
       });
     });
 
@@ -581,7 +598,7 @@
         x.classList.toggle('active', x.getAttribute('data-mode') === 'split');
       });
       app.setAttribute('data-mode', 'split');
-      refreshVideo();
+      positionPlayer();
     });
 
     // arrastar o flutuante pela barrinha
@@ -589,6 +606,7 @@
     let fdrag = false, fdx = 0, fdy = 0;
     fbar.addEventListener('pointerdown', function (e) {
       fdrag = true;
+      app.classList.add('resizing');
       const r = floatBox.getBoundingClientRect();
       fdx = e.clientX - r.left; fdy = e.clientY - r.top;
       floatBox.style.right = "auto";
@@ -601,10 +619,12 @@
       x = Math.max(4, Math.min(innerWidth - floatBox.offsetWidth - 4, x));
       y = Math.max(4, Math.min(innerHeight - floatBox.offsetHeight - 4, y));
       floatBox.style.left = x + "px"; floatBox.style.top = y + "px";
+      positionPlayer();
     });
     function endFdrag() {
       if (!fdrag) return;
       fdrag = false;
+      app.classList.remove('resizing');
       try { localStorage.setItem(FLOATKEY, JSON.stringify({ left: floatBox.style.left, top: floatBox.style.top })); } catch (e) {}
     }
     fbar.addEventListener('pointerup', endFdrag);
@@ -713,7 +733,8 @@
     });
 
     renderPontos(); renderRanking();
-    refreshVideo();   // estado inicial (Dividido → mini)
+    positionPlayer();                              // posição inicial
+    requestAnimationFrame(positionPlayer);         // reposiciona após o layout assentar
   </script>
 </body>
 </html>
