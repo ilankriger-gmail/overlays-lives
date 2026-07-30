@@ -67,7 +67,9 @@
     box-shadow: 0 0 0 0 rgba(232,66,14,.6); animation: ring 2s ease-out infinite;
   }
   @keyframes ring { 0%{box-shadow:0 0 0 0 rgba(232,66,14,.6)} 100%{box-shadow:0 0 0 8px rgba(232,66,14,0)} }
-  .modes { margin-left: auto; flex: 0 0 auto; display: flex; gap: 3px; background: rgba(255,255,255,.06); padding: 3px; border-radius: 10px; }
+  .modes { margin-left: auto; flex: 1 1 auto; display: flex; gap: 3px; background: rgba(255,255,255,.06); padding: 3px; border-radius: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .modes::-webkit-scrollbar { display: none; }
+  .modes button { flex: 0 0 auto; }
   .modes button {
     appearance: none; border: 0; background: transparent; color: var(--cinza);
     font-size: 11px; font-weight: 700; padding: 7px 9px; border-radius: 8px; cursor: pointer;
@@ -162,6 +164,84 @@
   #liveBox { flex: 1 1 auto; min-height: 0; position: relative; background: #000; display: none; }
   #liveBox iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 
+  /* ===== PLACAR / RANKING ===== */
+  #pontosBox { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; display: none; background: #100d0a; }
+  .pt-inner { padding: 12px 12px 24px; }
+  .pt-h { margin: 18px 0 8px; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--amarelo);
+    display: flex; align-items: center; gap: 8px; }
+  .pt-h:first-child { margin-top: 2px; }
+  .pt-h::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,138,46,.4), transparent); }
+  .desafio { margin-bottom: 12px; }
+  .d-nome { font-size: 14px; margin-bottom: 7px; color: #f3ede4; }
+  .opts { display: flex; flex-wrap: wrap; gap: 6px; }
+  .opts button {
+    appearance: none; border: 1.5px solid rgba(255,210,58,.35); background: rgba(255,255,255,.04);
+    color: var(--cinza); font-size: 13px; font-weight: 700; padding: 8px 12px; border-radius: 10px; cursor: pointer;
+  }
+  .opts button.sel { background: var(--amarelo); color: #17130f; border-color: var(--amarelo); }
+  .opts button:active { transform: scale(.97); }
+  .subtotal { margin: 12px 0 4px; font-size: 15px; color: var(--cinza); }
+  .subtotal b { color: #fff; font-size: 18px; }
+
+  .crono { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 4px; }
+  .crono-time { font-family: 'Space Grotesk', monospace; font-size: 30px; font-weight: 700; color: #fff; min-width: 92px; }
+  .crono-btns { display: flex; gap: 6px; }
+  .crono-btns button {
+    appearance: none; border: 0; border-radius: 10px; padding: 9px 14px; font-size: 13px; font-weight: 700; cursor: pointer;
+    background: var(--laranja); color: #17130f;
+  }
+  #cronoReset { background: rgba(255,255,255,.1); color: var(--cinza); }
+  #cronoStart.running { background: var(--vermelho); color: #fff; }
+  .seg-lbl { display: flex; flex-direction: column; gap: 3px; font-size: 11px; color: var(--cinza); letter-spacing: .04em; }
+  .seg-lbl input { width: 110px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14); color: #fff;
+    font-size: 16px; padding: 8px 10px; border-radius: 8px; }
+
+  .final { margin: 16px 0; padding: 14px; border-radius: 14px; text-align: center;
+    background: linear-gradient(160deg, rgba(255,138,46,.16), rgba(232,66,14,.10)); border: 1px solid rgba(255,138,46,.4); }
+  .final-calc { font-size: 13px; color: var(--cinza); }
+  .final-num { font-family: 'Space Grotesk', sans-serif; font-size: 44px; font-weight: 700; color: var(--amarelo); line-height: 1.1; }
+  .final-lbl { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--cinza); }
+
+  .salvar-row { display: flex; gap: 8px; }
+  .salvar-row input { flex: 1 1 auto; min-width: 0; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14);
+    color: #fff; font-size: 15px; padding: 10px 12px; border-radius: 10px; }
+  #salvarRanking { flex: 0 0 auto; border: 0; border-radius: 10px; padding: 10px 14px; font-size: 14px; font-weight: 700;
+    background: var(--amarelo); color: #17130f; cursor: pointer; }
+
+  #rankingList { display: flex; flex-direction: column; gap: 7px; }
+  .rk {
+    display: flex; align-items: center; gap: 10px; padding: 11px 13px; border-radius: 12px;
+    background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07);
+  }
+  .rk .pos { font-size: 18px; width: 26px; text-align: center; }
+  .rk .nome { flex: 1 1 auto; font-size: 16px; color: #f3ede4; }
+  .rk .pts { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 18px; color: var(--amarelo); }
+  .rk .del { background: none; border: 0; color: rgba(202,191,176,.5); font-size: 16px; cursor: pointer; padding: 2px 6px; }
+  .rk.novo { border-color: var(--amarelo); box-shadow: 0 0 0 1px var(--amarelo), 0 0 22px rgba(255,210,58,.25); }
+
+  /* ===== PLAYER FLUTUANTE ===== */
+  #floatLive {
+    position: fixed; z-index: 50; width: 190px; left: auto; right: 10px; top: 70px;
+    background: #000; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 12px 34px rgba(0,0,0,.6), 0 0 0 1px rgba(255,138,46,.5);
+    display: none; touch-action: none;
+  }
+  #floatLive.on { display: block; }
+  .float-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 6px;
+    padding: 5px 6px 5px 8px; background: #17130f; cursor: grab; touch-action: none;
+  }
+  .float-bar:active { cursor: grabbing; }
+  .float-close { appearance: none; border: 0; background: rgba(255,255,255,.12); color: #fff; font-size: 12px;
+    width: 22px; height: 22px; border-radius: 6px; cursor: pointer; line-height: 1; }
+  #floatLive iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; }
+  #floatBtn {
+    position: fixed; z-index: 49; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom));
+    appearance: none; border: 0; border-radius: 999px; padding: 11px 16px; font-size: 13px; font-weight: 700;
+    background: var(--laranja); color: #17130f; cursor: pointer; box-shadow: 0 8px 22px rgba(0,0,0,.45);
+  }
+  #floatBtn.on { background: var(--vermelho); color: #fff; }
+
   /* modos: escondem/mostram painéis */
   #app[data-mode="roteiro"] .divider,
   #app[data-mode="roteiro"] #chatBox { display: none; }
@@ -176,6 +256,13 @@
   #app[data-mode="live"] .divider,
   #app[data-mode="live"] #chatBox { display: none; }
   #app[data-mode="live"] #liveBox { display: block; }
+  /* modo Pontos: só o placar */
+  #app[data-mode="pontos"] #roteiro,
+  #app[data-mode="pontos"] .divider,
+  #app[data-mode="pontos"] #chatBox { display: none; }
+  #app[data-mode="pontos"] #pontosBox { display: block; }
+  /* botão flutuante some no modo Live (o vídeo já tá cheio) */
+  #app[data-mode="live"] #floatBtn { display: none; }
   /* durante o arraste, os iframes não “roubam” o toque */
   #app.resizing #chatInner iframe,
   #app.resizing #miniLive iframe { pointer-events: none; }
@@ -197,6 +284,7 @@
         <button data-mode="roteiro">Roteiro</button>
         <button data-mode="chat">Chat</button>
         <button data-mode="live">Live</button>
+        <button data-mode="pontos">Pontos</button>
       </div>
     </div>
 
@@ -216,7 +304,81 @@
       <div id="liveBox">
         <iframe id="liveFull" allow="autoplay; fullscreen" allowfullscreen></iframe>
       </div>
+
+      <!-- PLACAR / RANKING -->
+      <div id="pontosBox">
+        <div class="pt-inner">
+          <h2 class="pt-h">Desafios dos 60 pontos</h2>
+
+          <div class="desafio">
+            <div class="d-nome">1. Ligar para alguém e agradecer</div>
+            <div class="opts" data-d="0">
+              <button data-v="0">0</button>
+              <button data-v="20">20 · agradeceu</button>
+            </div>
+          </div>
+
+          <div class="desafio">
+            <div class="d-nome">2. Fazer alguém sorrir em 1 min</div>
+            <div class="opts" data-d="1">
+              <button data-v="0">0</button>
+              <button data-v="5">5 · cócegas</button>
+              <button data-v="20">20 · falando</button>
+            </div>
+          </div>
+
+          <div class="desafio">
+            <div class="d-nome">3. Tentar ouvir "eu te amo"</div>
+            <div class="opts" data-d="2">
+              <button data-v="-10">-10</button>
+              <button data-v="5">5 · pediu</button>
+              <button data-v="10">10 · falou 1º</button>
+              <button data-v="20">20 · sem pedir</button>
+            </div>
+          </div>
+
+          <div class="subtotal">Soma dos desafios: <b id="subDesafios">0</b> pts</div>
+
+          <h2 class="pt-h">4. Multiplicador — prancha baixa</h2>
+          <div class="crono">
+            <div class="crono-time" id="cronoTime">0.0s</div>
+            <div class="crono-btns">
+              <button id="cronoStart">▶ Iniciar</button>
+              <button id="cronoReset">Zerar</button>
+            </div>
+            <label class="seg-lbl">segundos na prancha
+              <input id="segundos" type="number" inputmode="decimal" min="0" step="0.1" value="0">
+            </label>
+          </div>
+
+          <div class="final">
+            <div class="final-calc" id="finalCalc">0 × 0s</div>
+            <div class="final-num" id="finalNum">0</div>
+            <div class="final-lbl">pontos finais</div>
+          </div>
+
+          <div class="salvar-row">
+            <input id="nomeJog" type="text" value="Joel" placeholder="Nome">
+            <button id="salvarRanking">Salvar no ranking</button>
+          </div>
+
+          <h2 class="pt-h">Ranking</h2>
+          <div id="rankingList"></div>
+
+          <button class="reset" id="resetPontos">Zerar desafios deste episódio</button>
+        </div>
+      </div>
     </div>
+
+    <!-- PLAYER FLUTUANTE (arraste pela barrinha de cima) -->
+    <div id="floatLive">
+      <div class="float-bar">
+        <span class="livebadge"><span class="dot"></span> Live</span>
+        <button class="float-close" title="Fechar">✕</button>
+      </div>
+      <iframe id="liveFloat" allow="autoplay; fullscreen" allowfullscreen></iframe>
+    </div>
+    <button id="floatBtn" title="Player flutuante">⧉ Live</button>
   </div>
 
   <script>
@@ -388,15 +550,25 @@
     }
     const liveMini = document.getElementById('liveMini');
     const liveFull = document.getElementById('liveFull');
-    // carrega o vídeo só no painel visível (evita 2 players tocando juntos)
-    function updateLive(mode) {
+    const liveFloat = document.getElementById('liveFloat');
+    let floating = false;
+
+    // carrega o vídeo só onde está visível (nunca 2 players tocando juntos)
+    function refreshVideo() {
+      const mode = app.getAttribute('data-mode');
+      if (floating) {
+        if (!liveFloat.src) liveFloat.src = liveUrl();
+        liveMini.src = ""; liveFull.src = "";
+        return;
+      }
+      liveFloat.src = "";
       if (mode === 'live') {
         if (!liveFull.src) liveFull.src = liveUrl();
         liveMini.src = "";
       } else if (mode === 'split') {
         if (!liveMini.src) liveMini.src = liveUrl();
         liveFull.src = "";
-      } else { // roteiro ou chat: sem vídeo
+      } else { // roteiro / chat / pontos: sem vídeo embutido
         liveMini.src = ""; liveFull.src = "";
       }
     }
@@ -408,10 +580,160 @@
         b.classList.add('active');
         const mode = b.getAttribute('data-mode');
         app.setAttribute('data-mode', mode);
-        updateLive(mode);
+        if (mode === 'live' && floating) setFloating(false);  // Live já mostra o vídeo cheio
+        refreshVideo();
       });
     });
-    updateLive(app.getAttribute('data-mode'));  // estado inicial (Dividido → mini)
+
+    // ================== player flutuante ==================
+    const floatBox = document.getElementById('floatLive');
+    const floatBtn = document.getElementById('floatBtn');
+    const FLOATKEY = "ddta-floatpos-v1";
+    (function () {
+      try {
+        const p = JSON.parse(localStorage.getItem(FLOATKEY) || "null");
+        if (p) { floatBox.style.left = p.left; floatBox.style.top = p.top; floatBox.style.right = "auto"; }
+      } catch (e) {}
+    })();
+    function setFloating(on) {
+      floating = on;
+      floatBox.classList.toggle('on', on);
+      floatBtn.classList.toggle('on', on);
+      refreshVideo();
+    }
+    floatBtn.addEventListener('click', function () { setFloating(!floating); });
+    floatBox.querySelector('.float-close').addEventListener('click', function () { setFloating(false); });
+
+    // arrastar o flutuante pela barrinha
+    const fbar = floatBox.querySelector('.float-bar');
+    let fdrag = false, fdx = 0, fdy = 0;
+    fbar.addEventListener('pointerdown', function (e) {
+      fdrag = true;
+      const r = floatBox.getBoundingClientRect();
+      fdx = e.clientX - r.left; fdy = e.clientY - r.top;
+      floatBox.style.right = "auto";
+      try { fbar.setPointerCapture(e.pointerId); } catch (err) {}
+      e.preventDefault();
+    });
+    fbar.addEventListener('pointermove', function (e) {
+      if (!fdrag) return;
+      let x = e.clientX - fdx, y = e.clientY - fdy;
+      x = Math.max(4, Math.min(innerWidth - floatBox.offsetWidth - 4, x));
+      y = Math.max(4, Math.min(innerHeight - floatBox.offsetHeight - 4, y));
+      floatBox.style.left = x + "px"; floatBox.style.top = y + "px";
+    });
+    function endFdrag() {
+      if (!fdrag) return;
+      fdrag = false;
+      try { localStorage.setItem(FLOATKEY, JSON.stringify({ left: floatBox.style.left, top: floatBox.style.top })); } catch (e) {}
+    }
+    fbar.addEventListener('pointerup', endFdrag);
+    fbar.addEventListener('pointercancel', endFdrag);
+
+    // ================== PLACAR ==================
+    const PTKEY = "ddta-pontos-v1";
+    const RKKEY = "ddta-ranking-v1";
+    let sel = [null, null, null];           // ponto escolhido em cada desafio
+    let segundos = 0;
+    let ranking = [{ nome: "Fran", pts: 4700 }, { nome: "Celso", pts: 9100 }];
+    let ultimoSalvo = null;
+    try { const s = JSON.parse(localStorage.getItem(PTKEY) || "null"); if (s) { sel = s.sel || sel; segundos = s.segundos || 0; } } catch (e) {}
+    try { const r = JSON.parse(localStorage.getItem(RKKEY) || "null"); if (r && r.length) ranking = r; } catch (e) {}
+
+    const subEl = document.getElementById('subDesafios');
+    const finalCalc = document.getElementById('finalCalc');
+    const finalNum = document.getElementById('finalNum');
+    const segInput = document.getElementById('segundos');
+
+    function subtotal() { return sel.reduce(function (a, v) { return a + (v || 0); }, 0); }
+    function finalPts() { return Math.round(subtotal() * (segundos > 0 ? segundos : 1)); }
+    function savePt() { try { localStorage.setItem(PTKEY, JSON.stringify({ sel: sel, segundos: segundos })); } catch (e) {} }
+    function saveRk() { try { localStorage.setItem(RKKEY, JSON.stringify(ranking)); } catch (e) {} }
+
+    function renderPontos() {
+      document.querySelectorAll('.opts').forEach(function (grp) {
+        const d = +grp.getAttribute('data-d');
+        grp.querySelectorAll('button').forEach(function (btn) {
+          btn.classList.toggle('sel', sel[d] !== null && +btn.getAttribute('data-v') === sel[d]);
+        });
+      });
+      subEl.textContent = subtotal();
+      const mult = segundos > 0 ? segundos : 1;
+      finalCalc.textContent = subtotal() + " × " + (segundos > 0 ? segundos + "s" : "1 (sem prancha)");
+      finalNum.textContent = finalPts();
+    }
+
+    document.querySelectorAll('.opts').forEach(function (grp) {
+      const d = +grp.getAttribute('data-d');
+      grp.querySelectorAll('button').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const v = +btn.getAttribute('data-v');
+          sel[d] = (sel[d] === v) ? null : v;   // toca de novo pra desmarcar
+          savePt(); renderPontos();
+        });
+      });
+    });
+    segInput.value = segundos || 0;
+    segInput.addEventListener('input', function () {
+      segundos = parseFloat(segInput.value) || 0; savePt(); renderPontos();
+    });
+
+    // cronômetro da prancha
+    const cronoTime = document.getElementById('cronoTime');
+    const cronoStart = document.getElementById('cronoStart');
+    let cRun = false, cStart = 0, cInt = null;
+    function cShow(ms) { cronoTime.textContent = (ms / 1000).toFixed(1) + "s"; }
+    cronoStart.addEventListener('click', function () {
+      if (!cRun) {
+        cRun = true; cStart = Date.now();
+        cronoStart.classList.add('running'); cronoStart.textContent = "⏸ Parar";
+        cInt = setInterval(function () { cShow(Date.now() - cStart); }, 100);
+      } else {
+        cRun = false; clearInterval(cInt);
+        cronoStart.classList.remove('running'); cronoStart.textContent = "▶ Iniciar";
+        const secs = (Date.now() - cStart) / 1000;
+        segundos = Math.round(secs * 10) / 10; segInput.value = segundos;
+        savePt(); renderPontos();
+      }
+    });
+    document.getElementById('cronoReset').addEventListener('click', function () {
+      cRun = false; clearInterval(cInt); cronoStart.classList.remove('running'); cronoStart.textContent = "▶ Iniciar";
+      cShow(0); segundos = 0; segInput.value = 0; savePt(); renderPontos();
+    });
+
+    // ranking
+    const rankingList = document.getElementById('rankingList');
+    const nomeJog = document.getElementById('nomeJog');
+    const medals = ["🥇", "🥈", "🥉"];
+    function renderRanking() {
+      const ord = ranking.slice().sort(function (a, b) { return b.pts - a.pts; });
+      rankingList.innerHTML = "";
+      ord.forEach(function (r, i) {
+        const row = document.createElement('div');
+        row.className = 'rk' + (r.nome === ultimoSalvo ? ' novo' : '');
+        row.innerHTML = '<span class="pos"></span><span class="nome"></span><span class="pts"></span><button class="del" title="Remover">✕</button>';
+        row.querySelector('.pos').textContent = medals[i] || (i + 1) + "º";
+        row.querySelector('.nome').textContent = r.nome;
+        row.querySelector('.pts').textContent = r.pts.toLocaleString('pt-BR');
+        row.querySelector('.del').addEventListener('click', function () {
+          ranking = ranking.filter(function (x) { return x !== r; }); saveRk(); renderRanking();
+        });
+        rankingList.appendChild(row);
+      });
+    }
+    document.getElementById('salvarRanking').addEventListener('click', function () {
+      const nome = (nomeJog.value || "").trim(); if (!nome) return;
+      const pts = finalPts();
+      const existe = ranking.find(function (x) { return x.nome.toLowerCase() === nome.toLowerCase(); });
+      if (existe) existe.pts = pts; else ranking.push({ nome: nome, pts: pts });
+      ultimoSalvo = nome; saveRk(); renderRanking();
+    });
+    document.getElementById('resetPontos').addEventListener('click', function () {
+      sel = [null, null, null]; segundos = 0; segInput.value = 0; cShow(0); savePt(); renderPontos();
+    });
+
+    renderPontos(); renderRanking();
+    refreshVideo();   // estado inicial (Dividido → mini)
   </script>
 </body>
 </html>
