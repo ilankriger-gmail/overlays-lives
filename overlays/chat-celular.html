@@ -163,13 +163,15 @@
     pointer-events: none;
   }
   .livebadge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--vermelho); }
-  #chatInner { flex: 1 1 auto; position: relative; min-height: 0; }
-  #chatInner iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; }
-  .chatlabel {
-    position: absolute; top: 6px; left: 10px; z-index: 2;
-    font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--cinza);
-    opacity: .7; pointer-events: none;
+  #chatInner { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+  .chat-src { flex: 0 0 auto; display: flex; gap: 5px; padding: 5px 8px; background: rgba(0,0,0,.25); }
+  .chat-src button {
+    appearance: none; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.05);
+    color: var(--cinza); font-size: 11px; font-weight: 700; padding: 5px 13px; border-radius: 999px; cursor: pointer;
   }
+  .chat-src button.active { background: var(--laranja); color: #17130f; border-color: var(--laranja); }
+  .chat-frame { flex: 1 1 auto; position: relative; min-height: 0; }
+  .chat-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; }
   /* aba Live: vídeo em tela cheia */
   #liveBox { flex: 1 1 auto; min-height: 0; position: relative; background: #000; display: none; }
   #fullSlot { position: absolute; inset: 0; background: #000; }
@@ -305,8 +307,13 @@
           <div id="miniSlot" class="slot"></div>
         </div>
         <div id="chatInner">
-          <span class="chatlabel">Chat ao vivo</span>
-          <iframe id="chat" allow="autoplay" referrerpolicy="no-referrer"></iframe>
+          <div class="chat-src">
+            <button data-src="geral" class="active">Geral</button>
+            <button data-src="tiktok">TikTok</button>
+          </div>
+          <div class="chat-frame">
+            <iframe id="chat" allow="autoplay" referrerpolicy="no-referrer"></iframe>
+          </div>
         </div>
       </div>
       <div id="liveBox"><div id="fullSlot" class="slot"></div></div>
@@ -393,7 +400,27 @@
   <script>
     // ================== CHAT ==================
     const CHAT_URL = "https://botrix.live/widgets/chat/?bid=nAk3QwId7JLqcNfOeaLYkA&theme=transparent&messageSound=0&messageDirection=up&platformIcon=false&bots=true&emojis=true&hideCommands=false&hideMessages=false&hideMessagesSeconds=15&widgetSize=21&streamTogether=true&cheer=true&pointsReward=true&animation=popIn&showTimestamp=false&shadowThickness=5&twitch=true&youtube=true&kick=true&trovo=false";
-    document.getElementById('chat').src = CHAT_URL;
+    const TIKTOK_URL = "https://tikfinity.zerody.one/widget/chat?cid=3506666";
+
+    // seletor de fonte do chat: Geral (Botrix: Twitch/YT/Kick) x TikTok (TikFinity)
+    const CHATKEY = "ddta-chatsrc-v1";
+    const chatFrame = document.getElementById('chat');
+    function setChatSrc(src, save) {
+      const url = src === 'tiktok' ? TIKTOK_URL : CHAT_URL;
+      if (chatFrame.getAttribute('data-cur') !== src) {
+        chatFrame.src = url; chatFrame.setAttribute('data-cur', src);
+      }
+      document.querySelectorAll('.chat-src button').forEach(function (b) {
+        b.classList.toggle('active', b.getAttribute('data-src') === src);
+      });
+      if (save) { try { localStorage.setItem(CHATKEY, src); } catch (e) {} }
+    }
+    let curChat = 'geral';
+    try { curChat = localStorage.getItem(CHATKEY) || 'geral'; } catch (e) {}
+    setChatSrc(curChat, false);
+    document.querySelectorAll('.chat-src button').forEach(function (b) {
+      b.addEventListener('click', function () { setChatSrc(b.getAttribute('data-src'), true); });
+    });
 
     // ================== ROTEIRO (EDITE AQUI) ==================
     // Cada bloco tem um título e uma lista de itens.
